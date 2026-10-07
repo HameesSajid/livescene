@@ -97,7 +97,7 @@ tracking accuracy, depth error, and narration quality. See "Roadmap".
 ## Known limitations
 
 - People in dark, close-up footage are sometimes missed or dropped by the tracker
-  (visible in `outputs/demo_clip2.mp4`). YOLOE-26s is far better than YOLOE-11s here
+  (seen on a dim living-room test clip). YOLOE-26s is far better than YOLOE-11s here
   (person confidence 0.56 vs 0.21 on the same frame) but not reliable.
 - Track IDs churn on cluttered background objects, which produces extra
   appeared / left events.
@@ -107,50 +107,119 @@ tracking accuracy, depth error, and narration quality. See "Roadmap".
   10 m are rough.
 - Mask outlines of multi-part objects can show stray connecting lines in the overlay.
 
-## Setup
+## Run locally (Windows, NVIDIA GPU)
 
-Requires Python 3.10+, an NVIDIA GPU, and about 8 GB of disk. Everything installs
-into one folder outside this repo so it can be deleted in one step; see
+Yes, it runs fully on your own machine: no cloud service or API key is used. You need
+Python 3.10 or newer, an NVIDIA GPU with a current driver, and about 9 GB of disk.
+Everything (environment, model weights, datasets) stays inside the project folder,
+in `.venv` and `.cache`, so deleting the folder removes all of it. See
 [docs/INSTALLED.md](docs/INSTALLED.md).
 
-```powershell
-python -m venv $env:USERPROFILE\cv-envs\livescene\venv
-$py = "$env:USERPROFILE\cv-envs\livescene\venv\Scripts\python.exe"
-& $py -m pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
-& $py -m pip install -r requirements.txt
-& $py -m pip install https://github.com/ultralytics/CLIP/archive/refs/heads/main.zip
-```
-
-Model weights download automatically on first run.
-
-## Usage
+**One-time setup.** Open PowerShell in the project folder:
 
 ```powershell
-$py = "$env:USERPROFILE\cv-envs\livescene\venv\Scripts\python.exe"
-
-& $py run.py                                   # live webcam
-& $py run.py --source video.mp4                # a video file
-& $py run.py --vocab "person,coffee mug,red backpack,whiteboard"   # your own vocabulary
-& $py run.py --source video.mp4 --headless --save outputs\demo.mp4 --report outputs\bench.json
-& $py run.py --no-vlm                          # perception only, fastest
-& $py tests\test_memory.py                     # unit tests (no GPU needed)
-& $py tools\eval_coco.py --n 1000              # detection mAP on a COCO subset
+cd C:\Users\hamee\vscode\livescene          # or wherever you cloned it
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install https://github.com/ultralytics/CLIP/archive/refs/heads/main.zip
 ```
 
-In the live window: `q` quits, `d` forces a description now, and typing a question in
-the console followed by Enter asks the language model about the current view.
+Check that the GPU is visible (should print `True` and the GPU name):
 
-## Local GPU or Colab?
+```powershell
+.\.venv\Scripts\python.exe -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+```
 
-- **Local (this setup)** is required for the live webcam demo. Colab cannot read a
-  local camera at interactive latency.
-- **Colab** is the better place for full benchmark runs (all 5,000 COCO images,
-  LVIS, caption metrics) and for trying larger models (YOLOE-L, Depth Anything V2
-  Base, a 2B VLM), because a T4 or better has more memory and tensor cores that make
-  FP16 worthwhile. `tools/eval_coco.py` runs unchanged there: clone the repo,
-  `pip install -r requirements.txt`, install the CLIP zip from "Setup", and run it
-  with `--n 5000`.
+**Run it.** Model weights (about 2.4 GB) download into `.cache` on the first run.
 
+```powershell
+.\.venv\Scripts\python.exe run.py                                  # live webcam
+.\.venv\Scripts\python.exe run.py --source samples\dog_square.mp4  # a video file, in a window
+.\.venv\Scripts\python.exe run.py --vocab "person,coffee mug,red backpack,whiteboard"
+.\.venv\Scripts\python.exe run.py --no-vlm                         # perception only, fastest
+.\.venv\Scripts\python.exe run.py --weights yoloe-26m-seg.pt       # more accurate detector
+```
+
+In the window: `q` quits, `d` forces a description now, and typing a question in the
+PowerShell console followed by Enter asks the language model about the current view.
+
+**Without a window** (save an annotated video and a latency report):
+
+```powershell
+.\.venv\Scripts\python.exe run.py --source samples\dog_square.mp4 --headless --save outputs\demo.mp4 --report outputs\bench.json
+```
+
+**Tests and evaluation:**
+
+```powershell
+.\.venv\Scripts\python.exe tests\test_memory.py            # unit tests, no GPU needed
+.\.venv\Scripts\python.exe tools\eval_coco.py --n 1000     # detection mAP on a COCO subset
+.\.venv\Scripts\python.exe tools\precision_check.py samples\dog_square.mp4   # FP32 vs FP16 on your GPU
+```
+
+In VS Code, open the project folder and pick `.venv` as the Python interpreter
+(Ctrl+Shift+P, "Python: Select Interpreter"); then `run.py` runs with the Run button.
+
+The `samples` folder is not part of the repository. Use any video of your own, or a
+webcam.
+
+## Run on Google Colab
+
+Colab cannot use your webcam at interactive speed, so use it for video files, the
+full accuracy evaluation, and larger models. The notebook
+[notebooks/livescene_colab.ipynb](notebooks/livescene_colab.ipynb) contains every
+step below as runnable cells.
+
+1. Open [colab.research.google.com](https://colab.research.google.com), choose
+   File, Upload notebook, and upload `notebooks/livescene_colab.ipynb`.
+2. Runtime, Change runtime type, select a GPU (T4 or better), Save.
+3. Get the code into Colab. If the repository is public:
+
+   ```
+   !git clone https://github.com/HameesSajid/livescene.git
+   %cd livescene
+   ```
+
+   If it is private: on GitHub choose Code, Download ZIP, then upload the ZIP with the
+   notebook's upload cell, which unpacks it.
+4. Install the libraries (PyTorch with CUDA is already on Colab):
+
+   ```
+   !pip -q install -r requirements.txt
+   !pip -q install https://github.com/ultralytics/CLIP/archive/refs/heads/main.zip
+   ```
+5. Upload a video and process it:
+
+   ```
+   from google.colab import files
+   video = next(iter(files.upload()))
+   !python run.py --source "$video" --headless --save outputs/colab_demo.mp4 --report outputs/colab_bench.json
+   ```
+6. Watch the result (re-encoded so the browser can play it):
+
+   ```
+   !ffmpeg -y -loglevel error -i outputs/colab_demo.mp4 -vcodec libx264 outputs/colab_demo_h264.mp4
+   from IPython.display import Video
+   Video("outputs/colab_demo_h264.mp4", embed=True, width=800)
+   ```
+7. Run the full COCO evaluation (all 5,000 validation images):
+
+   ```
+   !python tools/eval_coco.py --n 5000 --out outputs/coco_yoloe26s_full.json
+   ```
+8. Download what you want to keep with `files.download("outputs/colab_bench.json")`.
+   Colab deletes the session's files when it disconnects.
+
+## Local or Colab?
+
+| | Local GPU | Colab |
+|-|-----------|-------|
+| Live webcam, questions typed live | Yes | No |
+| Video files | Yes | Yes |
+| Full 5,000-image COCO evaluation | Slow but possible | Recommended |
+| Larger models (YOLOE-L, bigger VLM) | Limited by 6 GB | Yes |
+| Half precision speed-up | No on GTX 16-series (measured) | Expected on T4 and newer |
 ## Roadmap
 
 1. Full-set accuracy on Colab: `python tools/eval_coco.py --n 5000`, plus LVIS
@@ -169,9 +238,11 @@ livescene/perception.py  YOLOE + ByteTrack wrapper, metric depth, per-object dis
 livescene/narrator.py    asynchronous vision-language model
 livescene/pipeline.py    per-frame orchestration and overlay drawing
 livescene/profiler.py    latency statistics
+livescene/paths.py       where downloaded models and data are stored
 tests/test_memory.py     synthetic-track tests for the memory
 tools/precision_check.py FP32 vs FP16 check for the current GPU
 tools/eval_coco.py       COCO box mAP for open-vocabulary and closed-set detectors
+notebooks/               Colab notebook
 docs/                    concepts, code guide, install log
 outputs/                 benchmark reports (annotated videos are git-ignored)
 ```

@@ -170,14 +170,23 @@ Methods:
 - **`summary()`** — mean, median and 95th percentile per stage.
 - **`last(name)`** — most recent sample.
 
+## `livescene/paths.py` — where downloads go
+
+Defines `REPO` (the project folder) and `CACHE` (`<project>/.cache`, or the
+`LIVESCENE_CACHE` environment variable if set), and points Hugging Face's `HF_HOME` at
+`CACHE/hf`. Every script imports it before the model libraries, so all weights and
+datasets land in one git-ignored folder inside the project on any machine, including
+Colab.
+
 ## `run.py` — command line
 
 Parses arguments, opens the source, builds the `Pipeline`, and runs the loop. Points
 worth knowing:
 
-- `CACHE` / `HF_HOME` at the top route all model downloads to
-  `cv-envs\livescene`, and the working directory is switched to its `weights`
-  subfolder because Ultralytics downloads into the current directory.
+- `livescene.paths` is imported first so model downloads go to `.cache`, and the
+  working directory is switched to `.cache/weights` because Ultralytics downloads
+  into the current directory. Paths given on the command line are made absolute
+  before that switch.
 - For a file, time `t` is the video's own timeline (`frame / fps`), so the event log
   is identical between runs regardless of processing speed. For a webcam it is wall
   clock time.

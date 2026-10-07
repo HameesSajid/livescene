@@ -18,13 +18,15 @@ import argparse
 import io
 import json
 import os
+import sys
 import time
 import urllib.request
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
 
-CACHE = os.environ.get("LIVESCENE_CACHE", os.path.join(os.path.expanduser("~"), "cv-envs", "livescene"))
-os.environ.setdefault("HF_HOME", os.path.join(CACHE, "hf"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from livescene.paths import CACHE  # noqa: E402
+
 ANN_URL = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
 
 

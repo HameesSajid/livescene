@@ -1,8 +1,9 @@
 """Does half precision (FP16) work on this GPU, and is it faster?
 
-GTX 16-series cards are known to return NaNs in FP16. This script measures it instead
-of assuming: it runs the depth model in FP32 and under FP16 autocast on the same frame
-and reports speed and whether the FP16 output is finite and close to FP32.
+Some GPUs (GTX 16-series among them) are slower or numerically unreliable in FP16.
+This script measures it instead of assuming: it runs the depth model in FP32 and
+under FP16 autocast on the same frame and reports speed and whether the FP16 output
+is finite and close to FP32.
 
 Run: python tools/precision_check.py path/to/video.mp4
 """
@@ -12,8 +13,7 @@ import sys
 import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-CACHE = os.environ.get("LIVESCENE_CACHE", os.path.join(os.path.expanduser("~"), "cv-envs", "livescene"))
-os.environ.setdefault("HF_HOME", os.path.join(CACHE, "hf"))
+import livescene.paths  # noqa: E402,F401  (sets HF_HOME)
 
 import cv2  # noqa: E402
 import numpy as np  # noqa: E402

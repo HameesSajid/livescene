@@ -14,9 +14,7 @@ import os
 import threading
 import time
 
-# All downloaded weights live in one folder outside the repo (see docs/INSTALLED.md).
-CACHE = os.environ.get("LIVESCENE_CACHE", os.path.join(os.path.expanduser("~"), "cv-envs", "livescene"))
-os.environ.setdefault("HF_HOME", os.path.join(CACHE, "hf"))
+from livescene.paths import CACHE  # sets HF_HOME; keep above the model libraries
 
 import cv2  # noqa: E402
 import torch  # noqa: E402

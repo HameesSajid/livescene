@@ -1,8 +1,11 @@
-# Install PyTorch first, with CUDA:
+# Install PyTorch first, with CUDA (skip on Colab, where it is preinstalled):
 #   pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
-ultralytics
-transformers
+# Then this file, then the CLIP package Ultralytics needs for text prompts:
+#   pip install https://github.com/ultralytics/CLIP/archive/refs/heads/main.zip
+ultralytics>=8.4.0
+transformers>=5.0
 accelerate
+num2words
 lap
 pycocotools
 opencv-python
