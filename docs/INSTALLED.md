@@ -7,7 +7,7 @@ unchanged. LiveScene uses its own environment, which is the one that uses the GP
 
 ## 1. The LiveScene folder (everything heavy)
 
-`C:\Users\hamee\cv-envs\livescene\` — about 7.9 GB, outside OneDrive on purpose so it
+`C:\Users\hamee\cv-envs\livescene\` — about 8.1 GB, outside OneDrive on purpose so it
 does not sync.
 
 | Path | Size | Contents |
@@ -17,8 +17,12 @@ does not sync.
 | `hf\hub\models--depth-anything--Depth-Anything-V2-Metric-Indoor-Small-hf\` | 95 MB | Depth model |
 | `weights\yoloe-26s-seg.pt` | 30 MB | Detector in use |
 | `weights\mobileclip2_b.ts` | 242 MB | Text encoder for the detector in use |
-| `weights\yoloe-11s-seg.pt`, `yoloe-11m-seg.pt`, `yoloe-26m-seg.pt` | 151 MB | Detectors tried during model selection; not used, safe to delete |
+| `weights\yoloe-26m-seg.pt` | 67 MB | Medium detector, the higher-accuracy option (`--weights yoloe-26m-seg.pt`) |
+| `weights\yolov8m.pt` | 50 MB | The earlier project's detector, used only as the baseline in `tools/eval_coco.py` |
+| `weights\yoloe-11s-seg.pt`, `yoloe-11m-seg.pt` | 84 MB | Detectors tried during model selection; not used, safe to delete |
 | `weights\mobileclip_blt.ts` | 572 MB | Text encoder for the YOLOE-11 models; not used, safe to delete |
+| `data\coco\instances_val2017.json` | 20 MB | COCO val2017 annotations, for `tools/eval_coco.py` |
+| `data\coco\val2017\` | 154 MB | The first 1,000 COCO val2017 images |
 
 Remove everything:
 
@@ -26,11 +30,18 @@ Remove everything:
 Remove-Item -Recurse -Force "$env:USERPROFILE\cv-envs\livescene"
 ```
 
-Remove only the unused experiment weights (frees about 720 MB):
+Remove only the unused experiment weights (frees about 650 MB):
 
 ```powershell
 cd "$env:USERPROFILE\cv-envs\livescene\weights"
-Remove-Item yoloe-11s-seg.pt, yoloe-11m-seg.pt, yoloe-26m-seg.pt, mobileclip_blt.ts
+Remove-Item yoloe-11s-seg.pt, yoloe-11m-seg.pt, mobileclip_blt.ts
+```
+
+Remove only the COCO evaluation data (frees about 175 MB; it re-downloads if you run
+the evaluation again):
+
+```powershell
+Remove-Item -Recurse -Force "$env:USERPROFILE\cv-envs\livescene\data"
 ```
 
 ## 2. Small files outside that folder
@@ -42,9 +53,11 @@ Remove-Item yoloe-11s-seg.pt, yoloe-11m-seg.pt, yoloe-26m-seg.pt, mobileclip_blt
 
 ## 3. Inside the project folder (synced by OneDrive)
 
-`...\Computer vision\project\livescene\` — source code, docs, and `outputs\` (two
-annotated demo videos, about 5 MB each, and three JSON benchmark reports). No model
-weights or environments are stored here.
+`...\Computer vision\project\livescene\` — source code, docs, the hidden `.git`
+folder, and `outputs\` (two annotated demo videos, about 5 MB each, plus JSON
+benchmark and accuracy reports). No model weights, datasets or environments are
+stored here. The same content, minus the videos, is on GitHub at
+https://github.com/HameesSajid/livescene.
 
 ## 4. Using the GPU instead of the CPU
 
@@ -83,3 +96,4 @@ The GitHub CLI is not installed.
 | 2026-10-07 | Downloaded SmolVLM2-500M, Depth Anything V2 Metric Indoor Small, YOLOE-26s and its MobileCLIP2 text encoder |
 | 2026-10-07 | Downloaded YOLOE-11s/11m/26m and MobileCLIP-BLT for comparison; left in place, unused |
 | 2026-10-07 | Git for Windows 2.56.0 installed by the user; repository initialised in `livescene\` |
+| 2026-10-07 | Downloaded COCO val2017 annotations and 1,000 images to `data\coco`; downloaded `yolov8m.pt` as the evaluation baseline |

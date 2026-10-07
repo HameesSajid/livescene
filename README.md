@@ -69,8 +69,30 @@ What these numbers say, plainly:
   0.05 %), so everything runs in FP32. On an RTX-class or Colab T4 GPU, FP16 should
   be a real speed-up; that has not been measured here.
 
-Not measured yet: detection accuracy (mAP) on a benchmark, tracking accuracy, depth
-error, and caption quality. See "Roadmap".
+### Detection accuracy
+
+COCO val2017, first 1,000 images, standard COCO box mAP (`tools/eval_coco.py`).
+YOLOE is prompted with the 80 class names as text and was not trained on COCO, so its
+rows are zero-shot. YOLOv8m is the supervised closed-set detector from the earlier
+version of this project, run on the same images.
+
+| Detector | Vocabulary | mAP 50-95 | mAP 50 | Small / medium / large |
+|----------|------------|-----------|--------|------------------------|
+| YOLOv8m (earlier project) | 80 fixed classes, trained on COCO | 0.526 | 0.694 | 0.342 / 0.590 / 0.655 |
+| YOLOE-26s (default here) | any text, zero-shot | 0.383 | 0.537 | 0.224 / 0.427 / 0.521 |
+| YOLOE-26m (`--weights yoloe-26m-seg.pt`) | any text, zero-shot | 0.438 | 0.605 | 0.287 / 0.477 / 0.567 |
+
+Read this honestly: on the 80 classes COCO was built around, the supervised detector
+is more accurate, by 14 points for the small open-vocabulary model and 9 for the
+medium one. What the open-vocabulary detector buys is everything outside those 80
+classes ("game controller", "whiteboard", "red backpack"), instance masks from the
+same pass, and no retraining to change the vocabulary. The medium model recovers
+5.5 mAP for roughly 15 to 25 % more detector time on this GPU (measured back to back
+under the same load: 96 to 107 ms vs 121 ms per frame), so it is the better choice
+when accuracy matters more than frame rate.
+
+Not measured yet: accuracy on the full 5,000-image set and on rare categories (LVIS),
+tracking accuracy, depth error, and narration quality. See "Roadmap".
 
 ## Known limitations
 
@@ -112,6 +134,7 @@ $py = "$env:USERPROFILE\cv-envs\livescene\venv\Scripts\python.exe"
 & $py run.py --source video.mp4 --headless --save outputs\demo.mp4 --report outputs\bench.json
 & $py run.py --no-vlm                          # perception only, fastest
 & $py tests\test_memory.py                     # unit tests (no GPU needed)
+& $py tools\eval_coco.py --n 1000              # detection mAP on a COCO subset
 ```
 
 In the live window: `q` quits, `d` forces a description now, and typing a question in
@@ -121,14 +144,17 @@ the console followed by Enter asks the language model about the current view.
 
 - **Local (this setup)** is required for the live webcam demo. Colab cannot read a
   local camera at interactive latency.
-- **Colab** is the better place for benchmark evaluation (COCO / LVIS mAP, caption
-  metrics) and for trying larger models (YOLOE-L, Depth Anything V2 Base, a 2B VLM),
-  because a T4 or better has more memory and working FP16.
+- **Colab** is the better place for full benchmark runs (all 5,000 COCO images,
+  LVIS, caption metrics) and for trying larger models (YOLOE-L, Depth Anything V2
+  Base, a 2B VLM), because a T4 or better has more memory and tensor cores that make
+  FP16 worthwhile. `tools/eval_coco.py` runs unchanged there: clone the repo,
+  `pip install -r requirements.txt`, install the CLIP zip from "Setup", and run it
+  with `--n 5000`.
 
 ## Roadmap
 
-1. Accuracy evaluation on Colab: open-vocabulary mAP on COCO val2017 (the earlier
-   closed-set YOLOv8m project scored 0.668 mAP@0.5) and on LVIS minival.
+1. Full-set accuracy on Colab: `python tools/eval_coco.py --n 5000`, plus LVIS
+   minival, where open-vocabulary detection is expected to show its advantage.
 2. Narration quality: grounded vs ungrounded prompts, scored for object hallucination.
 3. TensorRT export of the detector and depth model.
 4. Event precision: appearance-based re-identification to stop ID churn.
@@ -145,6 +171,7 @@ livescene/pipeline.py    per-frame orchestration and overlay drawing
 livescene/profiler.py    latency statistics
 tests/test_memory.py     synthetic-track tests for the memory
 tools/precision_check.py FP32 vs FP16 check for the current GPU
+tools/eval_coco.py       COCO box mAP for open-vocabulary and closed-set detectors
 docs/                    concepts, code guide, install log
 outputs/                 benchmark reports (annotated videos are git-ignored)
 ```

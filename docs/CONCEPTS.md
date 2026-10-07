@@ -48,7 +48,11 @@ are open-vocabulary and more accurate on rare categories, but run at a few frame
 second on this GPU because they fuse text and image with cross-attention on every
 frame. YOLOE re-parameterises the text embeddings into the detection head once, when
 the vocabulary is set, so the per-frame cost is the same as a closed-set YOLO. It also
-outputs masks, which removes the need for a separate segmenter.
+outputs masks, which removes the need for a separate segmenter. The price is measured,
+not hidden: on 1,000 COCO val images YOLOv8m scores 0.526 mAP on its 80 trained
+classes, while zero-shot YOLOE-26s scores 0.383 and YOLOE-26m 0.438. A description
+system that can only ever name 80 things is the larger limitation, so the trade is
+taken, and the medium model is available when accuracy matters more than speed.
 
 **Segmentation: YOLOE masks instead of SAM 2.**
 SAM 2 gives sharper masks and its own video memory, but even the tiny variant costs

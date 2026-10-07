@@ -1,0 +1,14 @@
+{
+  "weights": "yoloe-26m-seg.pt",
+  "open_vocabulary_text_prompts": true,
+  "images": 1000,
+  "imgsz": 640,
+  "device": "NVIDIA GeForce GTX 1660 Ti",
+  "ms_per_image": 148.43276341705484,
+  "mAP50-95": 0.438314333621251,
+  "mAP50": 0.6053744564705066,
+  "mAP75": 0.48071455616268155,
+  "mAP_small": 0.28731481468058884,
+  "mAP_medium": 0.47726708817947466,
+  "mAP_large": 0.5667781140999831
+}

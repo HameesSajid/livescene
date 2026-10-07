@@ -198,6 +198,25 @@ Five tests on synthetic tracks, runnable without a GPU:
 | `test_near_respects_depth` | A cup sliding beside a person at the same depth is "next to"; the same image overlap 3 m behind is not |
 | `test_narration_trigger_is_event_driven` | 15 s of an unchanging scene triggers exactly one narration |
 
+## `tools/eval_coco.py`
+
+Measures detection accuracy with the standard COCO protocol.
+
+- **`fetch_annotations(data_dir)`** — downloads the COCO annotation zip once and
+  keeps only `instances_val2017.json`.
+- **`fetch_images(images, img_dir)`** — downloads any missing images in parallel,
+  writing each to a `.part` file first so an interrupted download is never mistaken
+  for a complete image.
+- **`main()`** — takes the first `--n` image ids in sorted order (a fixed,
+  repeatable subset), loads the detector, and runs it on every image at confidence
+  0.001, which is what mAP needs: the metric sweeps the threshold itself. For a YOLOE
+  model the 80 COCO class names are set as text prompts; for any other weights file
+  the model's own classes are used. Predictions are mapped to COCO category ids by
+  class name, scored with `pycocotools.COCOeval` restricted to the subset, and
+  written as JSON with `--out`. The `ms_per_image` it reports is not comparable to
+  the live pipeline's timing, because at this threshold every image yields up to 300
+  boxes and masks to post-process.
+
 ## `tools/precision_check.py`
 
 Runs the depth model in FP32 and under FP16 autocast on one frame, and prints both
