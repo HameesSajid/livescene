@@ -1,0 +1,291 @@
+{
+  "source": "2796077-uhd_3840_2160_25fps.mp4",
+  "frames": 269,
+  "frame_size": [
+    960,
+    540
+  ],
+  "device": "NVIDIA GeForce GTX 1660 Ti",
+  "fps": 5.358468741967999,
+  "latency": {
+    "detect+segment+track": {
+      "n": 269,
+      "mean_ms": 111.78037285896495,
+      "p50_ms": 99.96299992781132,
+      "p95_ms": 118.20548002142459
+    },
+    "depth": {
+      "n": 90,
+      "mean_ms": 96.44545665166031,
+      "p50_ms": 96.87050001230091,
+      "p95_ms": 99.02124494547024
+    },
+    "memory": {
+      "n": 269,
+      "mean_ms": 2.271373228682378,
+      "p50_ms": 1.8849000334739685,
+      "p95_ms": 5.211320007219911
+    },
+    "capture (decode)": {
+      "n": 269,
+      "mean_ms": 40.615910040145415,
+      "p50_ms": 40.493300068192184,
+      "p95_ms": 45.8360000513494
+    },
+    "end-to-end": {
+      "n": 259,
+      "mean_ms": 186.62047837806944,
+      "p50_ms": 159.05679995194077,
+      "p95_ms": 264.4057999830693
+    }
+  },
+  "peak_vram_mb": 234.04638671875,
+  "narrations": 0,
+  "log": [
+    {
+      "t": 0.08,
+      "kind": "enter",
+      "text": "person #1 appeared on the left, about 11.8 m away"
+    },
+    {
+      "t": 0.08,
+      "kind": "enter",
+      "text": "dog #2 appeared in the centre, about 3.6 m away"
+    },
+    {
+      "t": 0.08,
+      "kind": "enter",
+      "text": "person #4 appeared in the centre, about 10.3 m away"
+    },
+    {
+      "t": 0.2,
+      "kind": "enter",
+      "text": "person #6 appeared on the left, about 11.9 m away"
+    },
+    {
+      "t": 0.32,
+      "kind": "enter",
+      "text": "door #12 appeared in the centre, about 12.7 m away"
+    },
+    {
+      "t": 0.4,
+      "kind": "enter",
+      "text": "person #3 appeared on the left, about 12.5 m away"
+    },
+    {
+      "t": 0.68,
+      "kind": "enter",
+      "text": "person #23 appeared on the left, about 13.4 m away"
+    },
+    {
+      "t": 0.68,
+      "kind": "enter",
+      "text": "person #25 appeared on the left, about 10.7 m away"
+    },
+    {
+      "t": 0.72,
+      "kind": "enter",
+      "text": "person #27 appeared on the left, about 10.6 m away"
+    },
+    {
+      "t": 0.72,
+      "kind": "enter",
+      "text": "door #22 appeared in the centre, about 11.7 m away"
+    },
+    {
+      "t": 0.72,
+      "kind": "enter",
+      "text": "person #26 appeared on the right, about 6.2 m away"
+    },
+    {
+      "t": 0.8,
+      "kind": "enter",
+      "text": "person #30 appeared on the right, about 5.8 m away"
+    },
+    {
+      "t": 1.0,
+      "kind": "enter",
+      "text": "person #33 appeared on the right, about 5.8 m away"
+    },
+    {
+      "t": 1.36,
+      "kind": "exit",
+      "text": "door #12 left the view"
+    },
+    {
+      "t": 1.44,
+      "kind": "exit",
+      "text": "person #3 left the view"
+    },
+    {
+      "t": 1.64,
+      "kind": "near",
+      "text": "person #1 is now next to person #25"
+    },
+    {
+      "t": 1.72,
+      "kind": "exit",
+      "text": "person #23 left the view"
+    },
+    {
+      "t": 2.16,
+      "kind": "exit",
+      "text": "person #26 left the view"
+    },
+    {
+      "t": 2.32,
+      "kind": "enter",
+      "text": "truck #42 appeared on the right, about 9.9 m away"
+    },
+    {
+      "t": 2.36,
+      "kind": "exit",
+      "text": "person #27 left the view"
+    },
+    {
+      "t": 2.4,
+      "kind": "exit",
+      "text": "person #6 left the view"
+    },
+    {
+      "t": 2.52,
+      "kind": "exit",
+      "text": "person #33 left the view"
+    },
+    {
+      "t": 2.8,
+      "kind": "exit",
+      "text": "person #1 left the view"
+    },
+    {
+      "t": 3.16,
+      "kind": "exit",
+      "text": "person #25 left the view"
+    },
+    {
+      "t": 4.04,
+      "kind": "exit",
+      "text": "person #30 left the view"
+    },
+    {
+      "t": 4.08,
+      "kind": "exit",
+      "text": "door #22 left the view"
+    },
+    {
+      "t": 4.16,
+      "kind": "enter",
+      "text": "chair #58 appeared on the right, about 8.2 m away"
+    },
+    {
+      "t": 4.16,
+      "kind": "exit",
+      "text": "person #4 left the view"
+    },
+    {
+      "t": 4.32,
+      "kind": "exit",
+      "text": "truck #42 left the view"
+    },
+    {
+      "t": 4.96,
+      "kind": "approach",
+      "text": "dog #2 is coming closer (now 1.9 m)"
+    },
+    {
+      "t": 5.0,
+      "kind": "enter",
+      "text": "person #63 appeared in the centre, about 7.0 m away"
+    },
+    {
+      "t": 5.12,
+      "kind": "enter",
+      "text": "chair #65 appeared on the right, about 8.9 m away"
+    },
+    {
+      "t": 5.4,
+      "kind": "exit",
+      "text": "chair #58 left the view"
+    },
+    {
+      "t": 5.44,
+      "kind": "enter",
+      "text": "person #77 appeared on the left, about 6.8 m away"
+    },
+    {
+      "t": 5.48,
+      "kind": "enter",
+      "text": "truck #78 appeared in the centre, about 9.7 m away"
+    },
+    {
+      "t": 5.48,
+      "kind": "enter",
+      "text": "person #79 appeared on the left, about 6.4 m away"
+    },
+    {
+      "t": 6.6,
+      "kind": "exit",
+      "text": "chair #65 left the view"
+    },
+    {
+      "t": 6.6,
+      "kind": "exit",
+      "text": "person #77 left the view"
+    },
+    {
+      "t": 7.08,
+      "kind": "exit",
+      "text": "person #79 left the view"
+    },
+    {
+      "t": 7.4,
+      "kind": "exit",
+      "text": "person #63 left the view"
+    },
+    {
+      "t": 7.56,
+      "kind": "enter",
+      "text": "chair #84 appeared on the right, about 6.7 m away"
+    },
+    {
+      "t": 7.88,
+      "kind": "approach",
+      "text": "chair #84 is coming closer (now 5.3 m)"
+    },
+    {
+      "t": 8.04,
+      "kind": "exit",
+      "text": "truck #78 left the view"
+    },
+    {
+      "t": 8.36,
+      "kind": "exit",
+      "text": "dog #2 left the view"
+    },
+    {
+      "t": 8.4,
+      "kind": "enter",
+      "text": "cat #88 appeared on the right, about 2.0 m away"
+    },
+    {
+      "t": 8.52,
+      "kind": "enter",
+      "text": "chair #89 appeared on the right, about 5.2 m away"
+    },
+    {
+      "t": 9.36,
+      "kind": "enter",
+      "text": "chair #100 appeared on the left, about 4.1 m away"
+    },
+    {
+      "t": 9.84,
+      "kind": "exit",
+      "text": "cat #88 left the view"
+    },
+    {
+      "t": 10.68,
+      "kind": "exit",
+      "text": "chair #100 left the view"
+    }
+  ]
+}
