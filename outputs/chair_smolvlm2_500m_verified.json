@@ -1,0 +1,28 @@
+{
+  "vlm": "HuggingFaceTB/SmolVLM2-500M-Video-Instruct",
+  "mode": "verified",
+  "detector": "yoloe-26s-seg.pt",
+  "captions": 100,
+  "object_mentions": 222,
+  "hallucinated_mentions": 18,
+  "chair_i": 0.08108108108108109,
+  "chair_s": 0.17,
+  "recall": 0.5283018867924528,
+  "avg_words": 20.25,
+  "benchmark": "CHAIR (COCO val2017)",
+  "seconds_per_caption": 5.652625616998412,
+  "objects_rejected": 3,
+  "sentences_dropped": 3,
+  "threshold": 0.25,
+  "rewrite": false,
+  "two_step": true,
+  "strict_policy": {
+    "captions": 100,
+    "object_mentions": 188,
+    "hallucinated_mentions": 6,
+    "chair_i": 0.031914893617021274,
+    "chair_s": 0.05,
+    "recall": 0.49056603773584906,
+    "avg_words": 13.55
+  }
+}

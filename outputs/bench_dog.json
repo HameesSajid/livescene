@@ -1,333 +1,206 @@
 {
-  "source": "2796077-uhd_3840_2160_25fps.mp4",
+  "source": "dog_square.mp4",
   "frames": 269,
   "frame_size": [
     960,
     540
   ],
+  "profile": "laptop",
+  "detector": "yoloe-26s-seg.pt",
+  "language_model": "HuggingFaceTB/SmolVLM2-500M-Video-Instruct",
   "device": "NVIDIA GeForce GTX 1660 Ti",
-  "fps": 4.845694644592711,
+  "fps": 5.711883030985257,
   "latency": {
-    "detect+segment+track": {
+    "detect+segment": {
       "n": 269,
-      "mean_ms": 128.26457583487422,
-      "p50_ms": 108.4326000418514,
-      "p95_ms": 149.2345199920237
+      "mean_ms": 100.36099367328404,
+      "p50_ms": 82.72390009369701,
+      "p95_ms": 184.7884000279008
+    },
+    "track": {
+      "n": 269,
+      "mean_ms": 5.778036433008939,
+      "p50_ms": 5.462599918246269,
+      "p95_ms": 8.842160017229617
     },
     "depth": {
       "n": 90,
-      "mean_ms": 84.93475111123796,
-      "p50_ms": 79.98119998956099,
-      "p95_ms": 99.25144501030441
+      "mean_ms": 66.46171110397619,
+      "p50_ms": 63.580050016753376,
+      "p95_ms": 83.38873494649305
     },
     "memory": {
       "n": 269,
-      "mean_ms": 2.4411657995624005,
-      "p50_ms": 1.795999938622117,
-      "p95_ms": 6.181360012851655
+      "mean_ms": 2.6782710048055005,
+      "p50_ms": 2.404900034889579,
+      "p95_ms": 5.178420012816787
     },
     "draw": {
       "n": 269,
-      "mean_ms": 8.647306691543598,
-      "p50_ms": 7.547299959696829,
-      "p95_ms": 11.685039964504538
+      "mean_ms": 10.820137547176733,
+      "p50_ms": 7.305199978873134,
+      "p95_ms": 20.90899995528161
     },
     "capture (decode)": {
       "n": 269,
-      "mean_ms": 37.81741449166242,
-      "p50_ms": 37.18700003810227,
-      "p95_ms": 44.82741996180266
+      "mean_ms": 28.168781785567926,
+      "p50_ms": 27.57849998306483,
+      "p95_ms": 35.76294002123177
     },
     "end-to-end": {
       "n": 259,
-      "mean_ms": 206.36876100228386,
-      "p50_ms": 190.26219996158034,
-      "p95_ms": 281.8128399900161
+      "mean_ms": 175.0736131281574,
+      "p50_ms": 149.31560005061328,
+      "p95_ms": 298.8513799733482
     },
-    "vlm (async)": {
-      "n": 6,
-      "mean_ms": 5627.0182333343355,
-      "p50_ms": 5516.001849959139,
-      "p95_ms": 6528.092749998905
+    "describe (async)": {
+      "n": 5,
+      "mean_ms": 11417.747859982774,
+      "p50_ms": 12918.74250001274,
+      "p95_ms": 14609.041039994918
+    },
+    "vocabulary change": {
+      "n": 4,
+      "mean_ms": 0.9887750493362546,
+      "p50_ms": 0.9822500869631767,
+      "p95_ms": 1.1423100426327437
+    },
+    "answer (async)": {
+      "n": 1,
+      "mean_ms": 728.7786999950185,
+      "p50_ms": 728.7786999950185,
+      "p95_ms": 728.7786999950185
     }
   },
-  "peak_vram_mb": 2269.49560546875,
-  "narrations": 6,
+  "peak_vram_mb": 2501.78466796875,
+  "descriptions": 5,
+  "final_vocabulary_added": [
+    "building",
+    "bench",
+    "trash can",
+    "flower",
+    "flower pot"
+  ],
   "log": [
     {
-      "t": 0.08,
+      "t": 2.64,
+      "kind": "description",
+      "text": "A small dog is running in a courtyard with people walking around."
+    },
+    {
+      "t": 2.68,
       "kind": "enter",
-      "text": "person #1 appeared on the left, about 11.8 m away"
+      "text": "dog #2 appeared in the centre, about 2.6 m away"
     },
     {
-      "t": 0.08,
+      "t": 2.68,
       "kind": "enter",
-      "text": "dog #2 appeared in the centre, about 3.6 m away"
+      "text": "person #15 appeared on the left, about 10.2 m away"
     },
     {
-      "t": 0.08,
+      "t": 2.68,
       "kind": "enter",
-      "text": "person #4 appeared in the centre, about 10.3 m away"
-    },
-    {
-      "t": 0.2,
-      "kind": "enter",
-      "text": "person #6 appeared on the left, about 11.9 m away"
-    },
-    {
-      "t": 0.32,
-      "kind": "enter",
-      "text": "door #12 appeared in the centre, about 12.7 m away"
-    },
-    {
-      "t": 0.4,
-      "kind": "enter",
-      "text": "person #3 appeared on the left, about 12.5 m away"
-    },
-    {
-      "t": 0.68,
-      "kind": "enter",
-      "text": "person #23 appeared on the left, about 13.4 m away"
-    },
-    {
-      "t": 0.68,
-      "kind": "enter",
-      "text": "person #25 appeared on the left, about 10.7 m away"
-    },
-    {
-      "t": 0.72,
-      "kind": "enter",
-      "text": "person #27 appeared on the left, about 10.6 m away"
-    },
-    {
-      "t": 0.72,
-      "kind": "enter",
-      "text": "door #22 appeared in the centre, about 11.7 m away"
-    },
-    {
-      "t": 0.72,
-      "kind": "enter",
-      "text": "person #26 appeared on the right, about 6.2 m away"
-    },
-    {
-      "t": 0.8,
-      "kind": "enter",
-      "text": "person #30 appeared on the right, about 5.8 m away"
-    },
-    {
-      "t": 0.84,
-      "kind": "narration",
-      "text": "A small dog is running in a courtyard, with a person in the background."
-    },
-    {
-      "t": 1.0,
-      "kind": "enter",
-      "text": "person #33 appeared on the right, about 5.8 m away"
-    },
-    {
-      "t": 1.36,
-      "kind": "exit",
-      "text": "door #12 left the view"
-    },
-    {
-      "t": 1.44,
-      "kind": "exit",
-      "text": "person #3 left the view"
-    },
-    {
-      "t": 1.64,
-      "kind": "near",
-      "text": "person #1 is now next to person #25"
-    },
-    {
-      "t": 1.72,
-      "kind": "exit",
-      "text": "person #23 left the view"
-    },
-    {
-      "t": 2.16,
-      "kind": "exit",
-      "text": "person #26 left the view"
-    },
-    {
-      "t": 2.32,
-      "kind": "enter",
-      "text": "truck #42 appeared on the right, about 9.9 m away"
-    },
-    {
-      "t": 2.36,
-      "kind": "exit",
-      "text": "person #27 left the view"
-    },
-    {
-      "t": 2.4,
-      "kind": "exit",
-      "text": "person #6 left the view"
-    },
-    {
-      "t": 2.52,
-      "kind": "exit",
-      "text": "person #33 left the view"
+      "text": "person #20 appeared on the right, about 7.1 m away"
     },
     {
       "t": 2.8,
-      "kind": "exit",
-      "text": "person #1 left the view"
-    },
-    {
-      "t": 3.08,
-      "kind": "narration",
-      "text": "A small dog is running around in a public square, with people walking by and a person on a bench watching."
-    },
-    {
-      "t": 3.16,
-      "kind": "exit",
-      "text": "person #25 left the view"
-    },
-    {
-      "t": 4.04,
-      "kind": "exit",
-      "text": "person #30 left the view"
-    },
-    {
-      "t": 4.08,
-      "kind": "exit",
-      "text": "door #22 left the view"
-    },
-    {
-      "t": 4.16,
       "kind": "enter",
-      "text": "chair #58 appeared on the right, about 8.2 m away"
+      "text": "building #25 appeared in the centre, about 10.4 m away"
     },
     {
-      "t": 4.16,
+      "t": 4.28,
       "kind": "exit",
-      "text": "person #4 left the view"
+      "text": "person #15 left the view"
     },
     {
-      "t": 4.32,
-      "kind": "exit",
-      "text": "truck #42 left the view"
-    },
-    {
-      "t": 4.88,
-      "kind": "narration",
-      "text": "A small dog is running on a paved area, with a person in the background."
-    },
-    {
-      "t": 4.96,
+      "t": 4.92,
       "kind": "approach",
       "text": "dog #2 is coming closer (now 1.9 m)"
     },
     {
-      "t": 5.0,
-      "kind": "enter",
-      "text": "person #63 appeared in the centre, about 7.0 m away"
-    },
-    {
       "t": 5.12,
-      "kind": "enter",
-      "text": "chair #65 appeared on the right, about 8.9 m away"
+      "kind": "description",
+      "text": "A small dog is running in the street, and a man is walking on the sidewalk."
     },
     {
-      "t": 5.4,
-      "kind": "exit",
-      "text": "chair #58 left the view"
+      "t": 5.2,
+      "kind": "answer",
+      "text": "Q: What animal is in the scene and what is it doing?  A: dog"
     },
     {
       "t": 5.44,
-      "kind": "enter",
-      "text": "person #77 appeared on the left, about 6.8 m away"
-    },
-    {
-      "t": 5.48,
-      "kind": "enter",
-      "text": "truck #78 appeared in the centre, about 9.7 m away"
-    },
-    {
-      "t": 5.48,
-      "kind": "enter",
-      "text": "person #79 appeared on the left, about 6.4 m away"
-    },
-    {
-      "t": 6.6,
       "kind": "exit",
-      "text": "chair #65 left the view"
+      "text": "building #25 left the view"
     },
     {
-      "t": 6.6,
-      "kind": "exit",
-      "text": "person #77 left the view"
+      "t": 5.96,
+      "kind": "enter",
+      "text": "person #33 appeared on the left, about 5.4 m away"
     },
     {
-      "t": 6.88,
-      "kind": "narration",
-      "text": "A dog is running around in the park, and a person is walking on the sidewalk."
+      "t": 6.72,
+      "kind": "description",
+      "text": "A small dog is running around in a park, and a person is walking on a sidewalk."
+    },
+    {
+      "t": 7.0,
+      "kind": "enter",
+      "text": "trash can #34 appeared on the left, about 5.0 m away"
     },
     {
       "t": 7.08,
       "kind": "exit",
-      "text": "person #79 left the view"
+      "text": "person #33 left the view"
     },
     {
       "t": 7.4,
       "kind": "exit",
-      "text": "person #63 left the view"
+      "text": "person #20 left the view"
     },
     {
-      "t": 7.56,
-      "kind": "enter",
-      "text": "chair #84 appeared on the right, about 6.7 m away"
-    },
-    {
-      "t": 7.88,
-      "kind": "approach",
-      "text": "chair #84 is coming closer (now 5.3 m)"
-    },
-    {
-      "t": 8.04,
-      "kind": "exit",
-      "text": "truck #78 left the view"
-    },
-    {
-      "t": 8.36,
+      "t": 8.56,
       "kind": "exit",
       "text": "dog #2 left the view"
     },
     {
-      "t": 8.4,
-      "kind": "enter",
-      "text": "cat #88 appeared on the right, about 2.0 m away"
-    },
-    {
-      "t": 8.52,
-      "kind": "enter",
-      "text": "chair #89 appeared on the right, about 5.2 m away"
-    },
-    {
-      "t": 8.88,
-      "kind": "narration",
-      "text": "A person is seen walking away from the view, leaving a chair on the right."
-    },
-    {
-      "t": 9.36,
-      "kind": "enter",
-      "text": "chair #100 appeared on the left, about 4.1 m away"
-    },
-    {
-      "t": 9.84,
+      "t": 8.64,
       "kind": "exit",
-      "text": "cat #88 left the view"
+      "text": "trash can #34 left the view"
     },
     {
-      "t": 10.68,
-      "kind": "exit",
-      "text": "chair #100 left the view"
+      "t": 10.36,
+      "kind": "description",
+      "text": "There is a trash can on the sidewalk."
     },
     {
-      "t": 10.76,
-      "kind": "narration",
-      "text": "A truck is leaving the view, a dog is walking away, and a cat is coming into the scene."
+      "t": 10.36,
+      "kind": "rejected",
+      "text": "not confirmed by the detector: person"
+    },
+    {
+      "t": 10.4,
+      "kind": "enter",
+      "text": "chair #38 appeared on the left, about 4.2 m away"
+    },
+    {
+      "t": 10.4,
+      "kind": "enter",
+      "text": "chair #40 appeared on the left, about 4.6 m away"
+    },
+    {
+      "t": 10.52,
+      "kind": "enter",
+      "text": "flower #42 appeared on the right, about 3.8 m away"
+    },
+    {
+      "t": 10.72,
+      "kind": "description",
+      "text": "There is a trash can on the sidewalk."
+    },
+    {
+      "t": 10.72,
+      "kind": "rejected",
+      "text": "not confirmed by the detector: person, dog"
     }
   ]
 }

@@ -79,6 +79,44 @@ def test_narration_trigger_is_event_driven():
     assert "person #1" in mem.grounding_prompt(15.0)
 
 
+def test_untrusted_label_stays_silent_until_confirmed():
+    mem = SceneMemory((1280, 720), require_trust=True)
+    truck = Detection(1, "truck", 0.6, (700, 200, 1000, 500), 6.0)
+    events = run(mem, [[truck]] * 30)
+    assert events == [], "a label only the detector reports must not be announced"
+    assert mem.candidates(29 / FPS) == ["truck"] and mem.describe() == "Nothing recognised in view."
+    mem.trust(["truck"], 1.0)
+    events = mem.update(1.0, [truck])
+    assert [e.kind for e in events] == ["enter"] and mem.candidates(1.0) == []
+    # A track that was never announced leaves without an event.
+    mem2 = SceneMemory((1280, 720), require_trust=True)
+    assert run(mem2, [[truck]] * 30 + [[]] * 60) == []
+
+
+def test_trust_expires():
+    mem = SceneMemory((1280, 720), require_trust=True, trust_ttl_s=10.0)
+    mem.trust(["dog"], 0.0)
+    assert mem.is_trusted("dog", 5.0) and not mem.is_trusted("dog", 11.0)
+
+
+def test_id_switch_is_relinked_without_events():
+    mem = SceneMemory((1280, 720))
+    frames = [[Detection(1, "dog", 0.8, (400, 300, 600, 500), 3.0)] for _ in range(20)]
+    frames += [[] for _ in range(6)]  # the detector drops it for 0.2 s
+    frames += [[Detection(9, "dog", 0.8, (410, 305, 610, 505), 3.0)] for _ in range(20)]  # same dog, new tracker id
+    events = run(mem, frames)
+    assert [e.kind for e in events] == ["enter"], [e.text for e in events]
+    assert mem.resolve(9) == 1 and list(mem.tracks) == [1]
+
+
+def test_label_follows_a_vocabulary_change():
+    mem = SceneMemory((1280, 720))
+    frames = [[Detection(1, "truck", 0.4, (700, 200, 1000, 500), 6.0)] for _ in range(60)]
+    frames += [[Detection(1, "cart", 0.6, (700, 200, 1000, 500), 6.0)] for _ in range(30)]
+    run(mem, frames)
+    assert mem.tracks[1].label == "cart", "recent votes must outweigh an old label"
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):

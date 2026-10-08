@@ -30,14 +30,19 @@ from livescene.paths import CACHE  # noqa: E402
 ANN_URL = "http://images.cocodataset.org/annotations/annotations_trainval2017.zip"
 
 
-def fetch_annotations(data_dir):
-    path = os.path.join(data_dir, "instances_val2017.json")
+def fetch_annotations(data_dir, name="instances_val2017.json"):
+    """Returns the path of one val2017 annotation file, downloading the archive if needed.
+    Both files this project uses are extracted in one go so the archive is fetched once."""
+    path = os.path.join(data_dir, name)
     if not os.path.exists(path):
         print("downloading COCO annotations (241 MB) ...")
         with urllib.request.urlopen(ANN_URL) as r:
             z = zipfile.ZipFile(io.BytesIO(r.read()))
-        with z.open("annotations/instances_val2017.json") as src, open(path, "wb") as dst:
-            dst.write(src.read())
+        for member in ("instances_val2017.json", "captions_val2017.json"):
+            dst_path = os.path.join(data_dir, member)
+            if not os.path.exists(dst_path):
+                with z.open("annotations/" + member) as src, open(dst_path, "wb") as dst:
+                    dst.write(src.read())
     return path
 
 

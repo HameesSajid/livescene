@@ -39,11 +39,12 @@ class Track:
     first_t: float
     last_t: float
     hits: int = 0
-    confirmed: bool = False
+    confirmed: bool = False  # seen often enough to be a real detection
+    announced: bool = False  # confirmed and its label is trusted, so it may appear in events
     box: tuple = (0.0, 0.0, 0.0, 0.0)
     conf: float = 0.0
     distance: float | None = None
-    labels: Counter = field(default_factory=Counter)
+    labels: deque = field(default_factory=lambda: deque(maxlen=30))  # recent (label, confidence) votes
     dist_hist: deque = field(default_factory=lambda: deque(maxlen=90))  # (t, metres)
     motion_cooldown_until: float = 0.0
 
@@ -62,6 +63,13 @@ def _box_gap(a, b):
     dx = max(a[0] - b[2], b[0] - a[2], 0.0)
     dy = max(a[1] - b[3], b[1] - a[3], 0.0)
     return float(np.hypot(dx, dy))
+
+
+def _iou(a, b):
+    iw = max(0.0, min(a[2], b[2]) - max(a[0], b[0]))
+    ih = max(0.0, min(a[3], b[3]) - max(a[1], b[1]))
+    union = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - iw * ih
+    return iw * ih / union if union > 0 else 0.0
 
 
 def _plural(label, n):
@@ -87,6 +95,9 @@ class SceneMemory:
         near_depth_m=0.6,
         near_hold_s=0.5,
         near_release_s=1.5,
+        require_trust=False,
+        trust_ttl_s=90.0,
+        relink_iou=0.3,
     ):
         self.w, self.h = frame_size
         self.confirm_hits = confirm_hits
@@ -99,6 +110,13 @@ class SceneMemory:
         self.near_hold_s = near_hold_s
         self.near_release_s = near_release_s
         self._near_state = {}
+        # With require_trust, a label only produces events once something independent of
+        # the detector (the language model) has also reported it. See trust().
+        self.require_trust = require_trust
+        self.trust_ttl_s = trust_ttl_s
+        self.relink_iou = relink_iou
+        self.trusted = {}  # label -> time it was last confirmed
+        self._alias = {}   # tracker id -> the id this memory shows for the same object
 
         self.tracks = {}
         self.near_pairs = set()
@@ -107,20 +125,55 @@ class SceneMemory:
         self.last_narration_t = -1e9
 
     # ------------------------------------------------------------------ update
+    def trust(self, labels, t):
+        """Record that these labels were confirmed by a second source at time t."""
+        for label in labels:
+            self.trusted[label] = t
+
+    def is_trusted(self, label, t):
+        return not self.require_trust or t - self.trusted.get(label, -1e9) <= self.trust_ttl_s
+
+    def resolve(self, tracker_id):
+        """The id under which this memory keeps the object a tracker id refers to."""
+        return self._alias.get(tracker_id, tracker_id)
+
+    def _relink(self, d, t, present):
+        """The tracker sometimes gives a still-visible object a fresh id. If a new id lands on
+        a same-label track that just went missing, treat it as that track, not a new arrival."""
+        best, best_iou = None, self.relink_iou
+        for key, tr in self.tracks.items():
+            if key in present or tr.last_t >= t or tr.label != d.label:
+                continue
+            iou = _iou(d.box, tr.box)
+            if iou >= best_iou:
+                best, best_iou = key, iou
+        return best
+
     def update(self, t, detections):
         """Ingest one frame of detections; returns the events it produced."""
         new_events = []
+        present = {self.resolve(d.track_id) for d in detections if self.resolve(d.track_id) in self.tracks}
         for d in detections:
-            tr = self.tracks.get(d.track_id)
+            key = self.resolve(d.track_id)
+            tr = self.tracks.get(key)
             if tr is None:
-                tr = self.tracks[d.track_id] = Track(d.track_id, d.label, first_t=t, last_t=t)
+                old = self._relink(d, t, present)
+                if old is not None:
+                    self._alias[d.track_id] = key = old
+                    present.add(old)
+                    tr = self.tracks[old]
+                else:
+                    tr = self.tracks[key] = Track(key, d.label, first_t=t, last_t=t)
             tr.hits += 1
             tr.last_t = t
             tr.box = tuple(float(v) for v in d.box)
             tr.conf = d.conf
-            # Open-vocabulary labels flicker between near-synonyms; vote over the track's life.
-            tr.labels[d.label] += d.conf
-            tr.label = tr.labels.most_common(1)[0][0]
+            # Open-vocabulary labels flicker between near-synonyms; vote over recent frames.
+            tr.labels.append((d.label, d.conf))
+            votes = Counter()
+            for label, conf in tr.labels:
+                votes[label] += conf
+            tr.label = votes.most_common(1)[0][0]
             if d.distance is not None and np.isfinite(d.distance):
                 # Light smoothing: per-frame monocular depth is noisy.
                 tr.distance = d.distance if tr.distance is None else 0.7 * tr.distance + 0.3 * d.distance
@@ -128,17 +181,20 @@ class SceneMemory:
 
             if not tr.confirmed and tr.hits >= self.confirm_hits:
                 tr.confirmed = True
+            if tr.confirmed and not tr.announced and self.is_trusted(tr.label, t):
+                tr.announced = True
                 new_events.append(
                     Event(t, "enter", f"{tr.name} appeared {self._where(tr)}", (tr.track_id,), 1.0)
                 )
-            elif tr.confirmed:
+            elif tr.announced:
                 ev = self._motion_event(t, tr)
                 if ev:
                     new_events.append(ev)
 
         for tid in [tid for tid, tr in self.tracks.items() if t - tr.last_t > self.exit_after_s]:
             tr = self.tracks.pop(tid)
-            if tr.confirmed:
+            self._alias = {k: v for k, v in self._alias.items() if v != tid}
+            if tr.announced:
                 new_events.append(Event(t, "exit", f"{tr.name} left the view", (tid,), 1.0))
 
         new_events.extend(self._near_events(t))
@@ -163,7 +219,7 @@ class SceneMemory:
         return Event(t, "recede", f"{tr.name} is moving away (now {tr.distance:.1f} m)", (tr.track_id,), 0.75)
 
     def _near_events(self, t):
-        live = [tr for tr in self.tracks.values() if tr.confirmed and tr.last_t == t]
+        live = [tr for tr in self.tracks.values() if tr.announced and tr.last_t == t]
         now = set()
         for i, a in enumerate(live):
             for b in live[i + 1 :]:
@@ -207,7 +263,7 @@ class SceneMemory:
         return f"{side}, about {tr.distance:.1f} m away"
 
     def active(self, t=None):
-        trs = [tr for tr in self.tracks.values() if tr.confirmed]
+        trs = [tr for tr in self.tracks.values() if tr.announced]
         if t is not None:
             trs = [tr for tr in trs if t - tr.last_t <= self.exit_after_s]
         return sorted(trs, key=lambda tr: (tr.distance if tr.distance is not None else 1e9, tr.track_id))
@@ -222,6 +278,15 @@ class SceneMemory:
         lines = [f"- {tr.name}: {self._where(tr)}" for tr in trs[:max_objects]]
         rels = [f"- {self.tracks[a].name} is next to {self.tracks[b].name}" for a, b in sorted(self.near_pairs)]
         return "\n".join([head] + lines + rels)
+
+    def candidates(self, t, recent_s=1.0):
+        """Labels the detector keeps reporting that nothing else has confirmed yet."""
+        return sorted({tr.label for tr in self.tracks.values()
+                       if tr.confirmed and not tr.announced and t - tr.last_t <= recent_s})
+
+    def facts(self, max_objects=8):
+        """Measured position and distance of trusted objects, for question answering."""
+        return "\n".join(f"- {tr.label}: {self._where(tr)}" for tr in self.active()[:max_objects])
 
     def recent_events(self, t, horizon_s=10.0):
         return [ev for ev in self.events if t - ev.t <= horizon_s]

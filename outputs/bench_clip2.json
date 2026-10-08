@@ -1,538 +1,289 @@
 {
-  "source": "4010184-uhd_4096_2160_25fps.mp4",
+  "source": "gaming_sofa.mp4",
   "frames": 400,
   "frame_size": [
     960,
     506
   ],
+  "profile": "laptop",
+  "detector": "yoloe-26s-seg.pt",
+  "language_model": "HuggingFaceTB/SmolVLM2-500M-Video-Instruct",
   "device": "NVIDIA GeForce GTX 1660 Ti",
-  "fps": 3.039653966906963,
+  "fps": 5.321275229018417,
   "latency": {
-    "detect+segment+track": {
+    "detect+segment": {
       "n": 300,
-      "mean_ms": 142.0632239986056,
-      "p50_ms": 133.7636000243947,
-      "p95_ms": 185.07655001594688
+      "mean_ms": 69.1269789954337,
+      "p50_ms": 65.21314999554306,
+      "p95_ms": 81.46799000096507
+    },
+    "track": {
+      "n": 300,
+      "mean_ms": 6.730213999593009,
+      "p50_ms": 6.251799990423024,
+      "p95_ms": 8.585684944409877
     },
     "depth": {
       "n": 134,
-      "mean_ms": 93.64545596294356,
-      "p50_ms": 90.0728499982506,
-      "p95_ms": 115.50854996894486
+      "mean_ms": 53.91520223972985,
+      "p50_ms": 53.12325002159923,
+      "p95_ms": 62.117759982356795
     },
     "memory": {
       "n": 300,
-      "mean_ms": 4.99360500369221,
-      "p50_ms": 5.140150024089962,
-      "p95_ms": 8.219495066441596
+      "mean_ms": 5.238634332393606,
+      "p50_ms": 5.030399945098907,
+      "p95_ms": 7.721890101674945
     },
     "draw": {
       "n": 300,
-      "mean_ms": 11.253538663343837,
-      "p50_ms": 10.976749937981367,
-      "p95_ms": 13.928225089330226
+      "mean_ms": 25.511540999480832,
+      "p50_ms": 24.45004996843636,
+      "p95_ms": 39.010545035125695
     },
     "capture (decode)": {
       "n": 300,
-      "mean_ms": 48.66029766427042,
-      "p50_ms": 47.60515002999455,
-      "p95_ms": 58.970269962446764
+      "mean_ms": 24.488322336692363,
+      "p50_ms": 23.780099989380687,
+      "p95_ms": 32.02515497105197
     },
     "end-to-end": {
       "n": 300,
-      "mean_ms": 328.98481566885795,
-      "p50_ms": 307.0422500022687,
-      "p95_ms": 422.22670494811615
+      "mean_ms": 187.924878334937,
+      "p50_ms": 169.80569995939732,
+      "p95_ms": 276.57970000291243
     },
-    "vlm (async)": {
+    "describe (async)": {
       "n": 8,
-      "mean_ms": 7801.955199989607,
-      "p50_ms": 7633.234549954068,
-      "p95_ms": 9534.622064972064
+      "mean_ms": 9753.95388751349,
+      "p50_ms": 8552.47649998637,
+      "p95_ms": 13820.982589980122
+    },
+    "vocabulary change": {
+      "n": 3,
+      "mean_ms": 0.8757333659256498,
+      "p50_ms": 0.8815000765025616,
+      "p95_ms": 0.9004900115542114
+    },
+    "answer (async)": {
+      "n": 1,
+      "mean_ms": 1733.2410000963137,
+      "p50_ms": 1733.2410000963137,
+      "p95_ms": 1733.2410000963137
     }
   },
-  "peak_vram_mb": 2275.111328125,
-  "narrations": 8,
+  "peak_vram_mb": 2539.26904296875,
+  "descriptions": 8,
+  "final_vocabulary_added": [
+    "couch",
+    "game controller",
+    "pillow"
+  ],
   "log": [
     {
-      "t": 0.08,
+      "t": 1.92,
+      "kind": "description",
+      "text": "Two people are sitting on a couch in a living room, playing video games. One person is holding a controller, while the other is holding a controller with a blue light."
+    },
+    {
+      "t": 1.96,
+      "kind": "enter",
+      "text": "person #6 appeared on the left, about 2.6 m away"
+    },
+    {
+      "t": 2.04,
+      "kind": "enter",
+      "text": "couch #11 appeared in the centre, about 2.2 m away"
+    },
+    {
+      "t": 2.36,
+      "kind": "enter",
+      "text": "couch #12 appeared on the right, about 2.3 m away"
+    },
+    {
+      "t": 2.56,
+      "kind": "near",
+      "text": "person #6 is now next to couch #11"
+    },
+    {
+      "t": 3.16,
+      "kind": "enter",
+      "text": "person #20 appeared on the right, about 2.2 m away"
+    },
+    {
+      "t": 3.28,
+      "kind": "description",
+      "text": "Two people are sitting on a couch in a living room, one holding a smartphone and the other a tablet."
+    },
+    {
+      "t": 3.32,
       "kind": "enter",
       "text": "phone #3 appeared on the left, about 2.1 m away"
     },
     {
-      "t": 0.12,
+      "t": 3.32,
       "kind": "enter",
-      "text": "chair #1 appeared in the centre, about 3.9 m away"
+      "text": "phone #15 appeared on the right, about 1.8 m away"
     },
     {
-      "t": 0.12,
-      "kind": "enter",
-      "text": "chair #2 appeared on the left, about 5.3 m away"
+      "t": 3.56,
+      "kind": "answer",
+      "text": "Q: What are the people doing?  A: the people are playing a game on a device"
     },
     {
-      "t": 0.36,
-      "kind": "enter",
-      "text": "person #8 appeared on the left, about 2.6 m away"
-    },
-    {
-      "t": 0.44,
-      "kind": "enter",
-      "text": "sofa #10 appeared in the centre, about 2.2 m away"
-    },
-    {
-      "t": 0.76,
-      "kind": "enter",
-      "text": "phone #11 appeared on the right, about 1.9 m away"
-    },
-    {
-      "t": 0.92,
-      "kind": "narration",
-      "text": "A person is holding a phone in their hand, and it appears to be a phone with a red light on it."
-    },
-    {
-      "t": 0.96,
-      "kind": "enter",
-      "text": "person #5 appeared in the centre, about 2.2 m away"
-    },
-    {
-      "t": 1.08,
-      "kind": "enter",
-      "text": "phone #12 appeared on the right, about 1.9 m away"
-    },
-    {
-      "t": 1.24,
-      "kind": "enter",
-      "text": "plant #14 appeared on the left, about 5.1 m away"
-    },
-    {
-      "t": 1.32,
-      "kind": "enter",
-      "text": "door #16 appeared on the right, about 3.8 m away"
-    },
-    {
-      "t": 1.44,
-      "kind": "enter",
-      "text": "phone #15 appeared on the left, about 2.1 m away"
-    },
-    {
-      "t": 1.8,
-      "kind": "exit",
-      "text": "phone #3 left the view"
-    },
-    {
-      "t": 1.92,
-      "kind": "enter",
-      "text": "chair #25 appeared on the left, about 4.7 m away"
-    },
-    {
-      "t": 1.92,
-      "kind": "exit",
-      "text": "phone #11 left the view"
-    },
-    {
-      "t": 2.0,
-      "kind": "enter",
-      "text": "chair #27 appeared in the centre, about 4.4 m away"
-    },
-    {
-      "t": 2.16,
-      "kind": "exit",
-      "text": "phone #12 left the view"
-    },
-    {
-      "t": 2.2,
-      "kind": "exit",
-      "text": "chair #1 left the view"
-    },
-    {
-      "t": 2.2,
+      "t": 3.84,
       "kind": "near",
-      "text": "sofa #10 is now next to phone #15"
+      "text": "phone #3 is now next to person #6"
     },
     {
-      "t": 2.2,
+      "t": 3.84,
       "kind": "near",
-      "text": "person #5 is now next to sofa #10"
+      "text": "phone #3 is now next to couch #11"
     },
     {
-      "t": 2.4,
+      "t": 4.08,
       "kind": "enter",
-      "text": "phone #36 appeared on the right, about 1.8 m away"
-    },
-    {
-      "t": 2.48,
-      "kind": "exit",
-      "text": "chair #2 left the view"
-    },
-    {
-      "t": 2.48,
-      "kind": "exit",
-      "text": "door #16 left the view"
-    },
-    {
-      "t": 2.68,
-      "kind": "enter",
-      "text": "chair #42 appeared on the left, about 4.3 m away"
-    },
-    {
-      "t": 2.72,
-      "kind": "enter",
-      "text": "bowl #41 appeared on the right, about 4.2 m away"
-    },
-    {
-      "t": 2.76,
-      "kind": "enter",
-      "text": "chair #43 appeared in the centre, about 4.4 m away"
-    },
-    {
-      "t": 2.76,
-      "kind": "narration",
-      "text": "Two people are sitting on a couch, one holding a phone and the other a game controller."
-    },
-    {
-      "t": 3.0,
-      "kind": "exit",
-      "text": "plant #14 left the view"
-    },
-    {
-      "t": 3.12,
-      "kind": "enter",
-      "text": "plant #45 appeared on the left, about 5.5 m away"
-    },
-    {
-      "t": 3.64,
-      "kind": "enter",
-      "text": "door #46 appeared on the right, about 3.9 m away"
-    },
-    {
-      "t": 3.92,
-      "kind": "exit",
-      "text": "chair #43 left the view"
-    },
-    {
-      "t": 3.96,
-      "kind": "exit",
-      "text": "chair #42 left the view"
-    },
-    {
-      "t": 4.2,
-      "kind": "recede",
-      "text": "chair #25 is moving away (now 5.7 m)"
-    },
-    {
-      "t": 4.24,
-      "kind": "exit",
-      "text": "sofa #10 left the view"
-    },
-    {
-      "t": 4.28,
-      "kind": "exit",
-      "text": "bowl #41 left the view"
-    },
-    {
-      "t": 4.36,
-      "kind": "exit",
-      "text": "plant #45 left the view"
-    },
-    {
-      "t": 4.56,
-      "kind": "enter",
-      "text": "chair #48 appeared on the left, about 5.8 m away"
-    },
-    {
-      "t": 4.68,
-      "kind": "exit",
-      "text": "phone #36 left the view"
+      "text": "phone #24 appeared on the right, about 1.6 m away"
     },
     {
       "t": 4.72,
-      "kind": "enter",
-      "text": "sofa #52 appeared in the centre, about 2.2 m away"
-    },
-    {
-      "t": 4.72,
-      "kind": "enter",
-      "text": "phone #53 appeared on the left, about 2.1 m away"
-    },
-    {
-      "t": 4.72,
-      "kind": "narration",
-      "text": "A person is holding a phone in their hand, and another person is sitting on a sofa."
-    },
-    {
-      "t": 5.0,
-      "kind": "enter",
-      "text": "plant #56 appeared on the left, about 5.0 m away"
-    },
-    {
-      "t": 5.12,
       "kind": "exit",
       "text": "phone #15 left the view"
     },
     {
-      "t": 5.2,
+      "t": 5.16,
       "kind": "exit",
-      "text": "door #46 left the view"
+      "text": "phone #24 left the view"
     },
     {
-      "t": 5.28,
+      "t": 5.4,
+      "kind": "description",
+      "text": "Two people are sitting on a couch in a living room, playing video games."
+    },
+    {
+      "t": 5.4,
+      "kind": "rejected",
+      "text": "not confirmed by the detector: remote"
+    },
+    {
+      "t": 5.56,
       "kind": "enter",
-      "text": "phone #58 appeared on the right, about 2.0 m away"
-    },
-    {
-      "t": 5.64,
-      "kind": "exit",
-      "text": "chair #48 left the view"
-    },
-    {
-      "t": 5.76,
-      "kind": "near",
-      "text": "person #5 is now next to sofa #52"
-    },
-    {
-      "t": 6.2,
-      "kind": "enter",
-      "text": "bowl #63 appeared in the centre, about 4.7 m away"
-    },
-    {
-      "t": 6.84,
-      "kind": "enter",
-      "text": "phone #74 appeared on the right, about 1.9 m away"
-    },
-    {
-      "t": 6.84,
-      "kind": "exit",
-      "text": "phone #53 left the view"
-    },
-    {
-      "t": 6.88,
-      "kind": "narration",
-      "text": "Two people are playing video games on their respective phones, with one person holding a phone with a blue light on it."
-    },
-    {
-      "t": 6.92,
-      "kind": "exit",
-      "text": "plant #56 left the view"
-    },
-    {
-      "t": 7.2,
-      "kind": "exit",
-      "text": "phone #58 left the view"
-    },
-    {
-      "t": 7.28,
-      "kind": "exit",
-      "text": "person #5 left the view"
+      "text": "game controller #26 appeared on the right, about 1.9 m away"
     },
     {
       "t": 7.36,
-      "kind": "exit",
-      "text": "bowl #63 left the view"
+      "kind": "description",
+      "text": "Two people are sitting on a couch in a living room, playing a video game."
+    },
+    {
+      "t": 7.36,
+      "kind": "rejected",
+      "text": "not confirmed by the detector: remote"
     },
     {
       "t": 7.72,
-      "kind": "enter",
-      "text": "phone #83 appeared in the centre, about 1.8 m away"
-    },
-    {
-      "t": 7.8,
-      "kind": "enter",
-      "text": "phone #85 appeared on the left, about 2.0 m away"
-    },
-    {
-      "t": 8.12,
-      "kind": "enter",
-      "text": "person #89 appeared in the centre, about 2.1 m away"
-    },
-    {
-      "t": 8.28,
       "kind": "exit",
-      "text": "phone #74 left the view"
+      "text": "phone #3 left the view"
     },
     {
-      "t": 8.68,
+      "t": 7.84,
       "kind": "enter",
-      "text": "chair #92 appeared in the centre, about 3.9 m away"
+      "text": "phone #36 appeared in the centre, about 1.8 m away"
     },
     {
-      "t": 8.96,
+      "t": 8.08,
+      "kind": "near",
+      "text": "person #6 is now next to person #20"
+    },
+    {
+      "t": 8.32,
       "kind": "exit",
-      "text": "phone #85 left the view"
+      "text": "phone #26 left the view"
+    },
+    {
+      "t": 8.88,
+      "kind": "exit",
+      "text": "couch #12 left the view"
     },
     {
       "t": 9.0,
       "kind": "enter",
-      "text": "phone #98 appeared in the centre, about 1.9 m away"
+      "text": "couch #12 appeared in the centre, about 2.3 m away"
     },
     {
-      "t": 9.12,
-      "kind": "narration",
-      "text": "Two individuals are playing a video game on their respective phones, with the phone #83 in the center and the phone #85 on the left."
+      "t": 10.24,
+      "kind": "description",
+      "text": "Two people are sitting on a couch in a living room, playing a video game together."
     },
     {
-      "t": 9.36,
-      "kind": "near",
-      "text": "person #8 is now next to person #89"
+      "t": 10.24,
+      "kind": "rejected",
+      "text": "not confirmed by the detector: remote"
     },
     {
-      "t": 9.48,
-      "kind": "exit",
-      "text": "chair #27 left the view"
-    },
-    {
-      "t": 9.68,
-      "kind": "exit",
-      "text": "phone #83 left the view"
-    },
-    {
-      "t": 9.72,
+      "t": 10.4,
       "kind": "enter",
-      "text": "plant #100 appeared on the left, about 4.1 m away"
+      "text": "pillow #40 appeared on the left, about 2.2 m away"
     },
     {
-      "t": 10.36,
-      "kind": "recede",
-      "text": "chair #25 is moving away (now 5.2 m)"
-    },
-    {
-      "t": 10.68,
+      "t": 10.4,
       "kind": "enter",
-      "text": "phone #109 appeared on the left, about 2.0 m away"
-    },
-    {
-      "t": 10.8,
-      "kind": "exit",
-      "text": "plant #100 left the view"
-    },
-    {
-      "t": 10.84,
-      "kind": "narration",
-      "text": "Two people are playing a video game on a phone, with the phone being held by person #89."
+      "text": "pillow #41 appeared in the centre, about 2.2 m away"
     },
     {
       "t": 11.16,
       "kind": "enter",
-      "text": "phone #116 appeared on the right, about 1.8 m away"
+      "text": "phone #45 appeared on the right, about 1.8 m away"
     },
     {
-      "t": 11.28,
+      "t": 11.4,
+      "kind": "near",
+      "text": "couch #12 is now next to pillow #41"
+    },
+    {
+      "t": 11.56,
       "kind": "exit",
-      "text": "phone #98 left the view"
+      "text": "phone #36 left the view"
     },
     {
-      "t": 11.36,
-      "kind": "exit",
-      "text": "person #89 left the view"
-    },
-    {
-      "t": 11.8,
-      "kind": "exit",
-      "text": "person #8 left the view"
-    },
-    {
-      "t": 11.88,
+      "t": 11.68,
       "kind": "enter",
-      "text": "person #118 appeared on the right, about 2.2 m away"
+      "text": "game controller #47 appeared on the left, about 2.0 m away"
     },
     {
-      "t": 11.92,
-      "kind": "enter",
-      "text": "phone #119 appeared on the right, about 1.8 m away"
-    },
-    {
-      "t": 12.16,
-      "kind": "exit",
-      "text": "phone #109 left the view"
-    },
-    {
-      "t": 12.2,
-      "kind": "enter",
-      "text": "plant #117 appeared on the left, about 5.0 m away"
-    },
-    {
-      "t": 12.36,
-      "kind": "exit",
-      "text": "phone #116 left the view"
-    },
-    {
-      "t": 12.4,
-      "kind": "enter",
-      "text": "chair #124 appeared in the centre, about 4.1 m away"
-    },
-    {
-      "t": 12.4,
-      "kind": "enter",
-      "text": "person #121 appeared on the left, about 2.7 m away"
-    },
-    {
-      "t": 12.84,
-      "kind": "narration",
-      "text": "Two people are playing video games on their phones, with one phone being closer to the camera than the other."
-    },
-    {
-      "t": 12.96,
-      "kind": "exit",
-      "text": "phone #119 left the view"
-    },
-    {
-      "t": 13.0,
-      "kind": "enter",
-      "text": "chair #132 appeared in the centre, about 4.4 m away"
-    },
-    {
-      "t": 13.28,
-      "kind": "enter",
-      "text": "phone #140 appeared in the centre, about 1.8 m away"
-    },
-    {
-      "t": 13.44,
-      "kind": "exit",
-      "text": "person #118 left the view"
+      "t": 12.68,
+      "kind": "description",
+      "text": "Two people are sitting on a couch in a living room, holding controllers. One person is wearing a white shirt, and the other is wearing a gray shirt. They are both looking at the controllers."
     },
     {
       "t": 13.56,
-      "kind": "enter",
-      "text": "person #143 appeared on the right, about 2.2 m away"
-    },
-    {
-      "t": 13.64,
       "kind": "exit",
-      "text": "chair #124 left the view"
+      "text": "game controller #47 left the view"
     },
     {
-      "t": 13.72,
-      "kind": "exit",
-      "text": "chair #92 left the view"
+      "t": 13.96,
+      "kind": "near",
+      "text": "pillow #41 is now next to phone #45"
     },
     {
-      "t": 13.8,
-      "kind": "exit",
-      "text": "plant #117 left the view"
-    },
-    {
-      "t": 14.44,
-      "kind": "enter",
-      "text": "phone #151 appeared in the centre, about 1.8 m away"
-    },
-    {
-      "t": 14.52,
-      "kind": "exit",
-      "text": "phone #140 left the view"
-    },
-    {
-      "t": 14.76,
-      "kind": "narration",
-      "text": "Two people are playing a video game on a phone, with a phone number displayed on the screen."
-    },
-    {
-      "t": 15.04,
-      "kind": "enter",
-      "text": "plant #156 appeared on the left, about 5.1 m away"
+      "t": 15.28,
+      "kind": "description",
+      "text": "Two people are sitting on a couch in a living room, playing a video game. One person is wearing a white shirt and the other is wearing a light blue shirt. They are both holding controllers and are looking at the game."
     },
     {
       "t": 15.72,
       "kind": "near",
-      "text": "person #121 is now next to person #143"
+      "text": "person #6 is now next to person #20"
+    },
+    {
+      "t": 15.96,
+      "kind": "description",
+      "text": "Two people are sitting on a couch in a living room, playing a video game."
+    },
+    {
+      "t": 15.96,
+      "kind": "rejected",
+      "text": "not confirmed by the detector: game controller"
     }
   ]
 }

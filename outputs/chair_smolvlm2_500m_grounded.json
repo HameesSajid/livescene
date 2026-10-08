@@ -1,0 +1,14 @@
+{
+  "vlm": "HuggingFaceTB/SmolVLM2-500M-Video-Instruct",
+  "mode": "grounded",
+  "detector": "yoloe-26s-seg.pt",
+  "captions": 100,
+  "object_mentions": 293,
+  "hallucinated_mentions": 34,
+  "chair_i": 0.11604095563139932,
+  "chair_s": 0.31,
+  "recall": 0.610062893081761,
+  "avg_words": 24.64,
+  "benchmark": "CHAIR (COCO val2017)",
+  "seconds_per_caption": 3.1582726470020135
+}

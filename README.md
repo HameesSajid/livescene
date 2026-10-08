@@ -1,73 +1,149 @@
 # LiveScene
 
-Open-vocabulary scene understanding from a single camera, with an event-driven
-language narrator, running on a 6 GB laptop GPU.
+Scene description from a single camera that checks itself: a vision-language model says
+what it sees, an open-vocabulary detector has to confirm each object, and only what both
+agree on is described, tracked and measured.
 
-LiveScene watches a webcam or video and keeps a live, structured account of the scene:
-which objects are present (named by free text, not a fixed class list), which one is
-which over time, how far away each is in metres, and what just changed. A small
-vision-language model turns that into sentences and answers questions, but only when
-something actually happens.
+LiveScene watches a webcam or video and keeps a live account of the scene: which objects
+are present (named in free text, not from a fixed class list), which one is which over
+time, how far away each is in metres, what just changed, and a short description in
+plain language. You can type a question about the scene and get an answer.
 
 ```
-[   0.08s] enter    dog #2 appeared in the centre, about 3.6 m away
-[   4.92s] approach dog #2 is coming closer (now 1.9 m)
-narration: A small dog is running around in a public square, with people walking by
-           and a person sitting on a bench.
+[   1.92s] description Two people are sitting on a couch in a living room, playing video games.
+[   3.56s] answer      Q: What are the people doing?  A: the people are playing a game on a device
+[   4.92s] approach    dog #2 is coming closer (now 1.9 m)
+[   5.40s] rejected    not confirmed by the detector: remote
 ```
 
-## Why this design
+## How it works
 
-Captioning every frame with a large model is too slow for live video and repeats
-itself. LiveScene splits the work by speed:
+Two loops run at different speeds.
 
-| Layer | Runs | Model | Output |
-|-------|------|-------|--------|
-| Detection + segmentation | every frame | YOLOE-26s (text-prompted) | boxes, masks, labels |
-| Tracking | every frame | ByteTrack | persistent object IDs |
-| Depth | every 3rd frame | Depth Anything V2 Small (metric) | distance in metres |
-| Scene memory | every frame | this repo, `livescene/memory.py` | object state, relations, events |
-| Narration and Q&A | on events only, own thread | SmolVLM2-500M | sentences grounded in the memory |
+| Loop | Runs | What it does |
+|------|------|--------------|
+| Fast | every frame | Detect and segment (YOLOE, text-prompted), track (ByteTrack), estimate metric depth (Depth Anything V2), update the scene memory, draw |
+| Slow | when something changed, on its own thread | Propose, verify, describe (below), and answer questions |
 
-The scene memory is the original part of this project. It converts noisy per-frame
-detections into confirmed objects and discrete events (appeared, left, coming closer,
-moving away, now next to), decides when the language model is worth calling, and
-hands it the measured facts so it has less room to hallucinate. See
-[docs/CONCEPTS.md](docs/CONCEPTS.md) for every concept used, the alternatives, and
-why this set is sufficient, and [docs/CODE_GUIDE.md](docs/CODE_GUIDE.md) for a
-walkthrough of every file and function.
+**Propose, verify, describe.** This is the part that controls hallucination.
+
+1. *Propose.* The language model looks at the frame and returns the objects it sees and
+   a short description.
+2. *Verify.* Each object is given to a second detector as a text prompt. If the detector
+   cannot find it, it is rejected.
+3. *Describe.* Sentences that mention a rejected object are removed (or the model
+   rewrites without them).
+4. *Feed back.* Confirmed objects become the tracking detector's vocabulary, so the
+   tracker follows what is actually in this scene instead of a fixed word list.
+
+A label produces events ("appeared", "left", "coming closer", "next to") only once both
+models have reported it. Detections that only the detector believes in are drawn as a
+thin grey box with a question mark and are otherwise ignored.
+
+The first version of this project did the opposite: it handed the detector's labels to
+the language model as facts. The benchmark below shows that this made hallucination
+worse, which is why the direction of trust was reversed. See
+[docs/CONCEPTS.md](docs/CONCEPTS.md) for the reasoning and
+[docs/CODE_GUIDE.md](docs/CODE_GUIDE.md) for every file and function.
+
+## Profiles
+
+The same code runs with small or large models. `--profile auto` (the default) picks by
+GPU memory.
+
+| Profile | GPU memory | Detector | Depth | Language model |
+|---------|------------|----------|-------|----------------|
+| `laptop` | 6 GB | YOLOE-26s | Depth Anything V2 Small | SmolVLM2-500M |
+| `colab-t4` | 12 to 16 GB | YOLOE-26l | Depth Anything V2 Base | Qwen2.5-VL-3B, half precision |
+| `colab` | 22 GB or more | YOLOE-26x | Depth Anything V2 Large | Qwen2.5-VL-7B, half precision, 3 frames per call |
+
+Only the `laptop` profile has been run and measured so far. The two Colab profiles use
+the same code path with larger checkpoints of the same model families; their numbers
+come from running the notebook on Colab.
 
 ## Measured results
 
-Hardware: NVIDIA GTX 1660 Ti (6 GB), Intel i7-10750H, 16 GB RAM, Windows 11,
-PyTorch 2.6 + CUDA 12.4, FP32. Input: 4K 25 fps video resized to 960 px wide.
-Timings use `torch.cuda.synchronize()` around each stage.
+All numbers below are for the `laptop` profile on an NVIDIA GTX 1660 Ti (6 GB),
+Intel i7-10750H, 16 GB RAM, Windows 11, PyTorch 2.6 + CUDA 12.4, FP32.
 
-| Stage | Median latency |
-|-------|----------------|
-| Detect + segment + track (YOLOE-26s, 640) | 56 ms |
-| Depth (266 px short side, every 3rd frame) | 44 ms |
+### Hallucination in descriptions (CHAIR)
+
+100 COCO val2017 images, one caption each (`tools/eval_hallucination.py --task chair`).
+CHAIR_s is the share of captions that name at least one object that is not in the image;
+CHAIR_i is the share of all named objects that are not there; recall is the share of
+real objects the captions cover. Lower is better for the first two.
+
+| Method (language model: SmolVLM2-500M) | CHAIR_s | CHAIR_i | Recall | Words |
+|----------------------------------------|---------|---------|--------|-------|
+| First version: detector labels given to the model as facts | 31.0 % | 11.6 % | 61.0 % | 24.6 |
+| Language model alone | 20.0 % | 9.3 % | 52.8 % | 20.4 |
+| Verify, lenient: cut only if the detector and the model's own yes/no both say no | 17.0 % | 8.1 % | 52.8 % | 20.2 |
+| **Verify, strict (default): cut whatever the detector cannot confirm** | **5.0 %** | **3.2 %** | **49.1 %** | 13.6 |
+
+What this shows:
+
+- Feeding detector output to the model as facts raised the share of captions with an
+  invented object from 20 % to 31 %. The model repeated the detector's mistakes.
+- Strict verification cut it to 5 %, six times lower than the first version, for a
+  recall cost of about 4 points against the model alone. Captions also get shorter,
+  because a sentence with an unconfirmed object is removed whole.
+- The lenient policy barely helps with this model: asked directly, it stands by almost
+  everything it said (it rejected 3 objects in 100 images).
+- With 100 images the 31 % vs 5 % gap is far outside sampling noise; the 20 % vs 17 %
+  gap is not.
+
+### Hallucination in yes/no questions (POPE)
+
+100 COCO images, 1,200 questions of the form "Is there a ... in the image?", half about
+objects that are present (`tools/eval_hallucination.py --task pope`). Negatives are
+chosen at random, from the most frequent categories, or from categories that usually
+co-occur with what is present (adversarial).
+
+| Setting | Language model alone: accuracy / F1 / says yes | First version (detector facts in prompt): accuracy / F1 / says yes |
+|---------|---------------------------|----------------------------|
+| Random | 88.3 % / 0.884 / 51 % | 81.7 % / 0.778 / 33 % |
+| Popular | 78.3 % / 0.804 / 61 % | 79.8 % / 0.761 / 34 % |
+| Adversarial | 72.8 % / 0.766 / 66 % | 78.5 % / 0.750 / 36 % |
+
+The small model alone says "yes" too easily to plausible objects (adversarial accuracy
+73 %). Adding the detector's list made it cautious instead: fewer false alarms, but it
+then missed a third of the objects that really were there (recall 64 % against 89 %).
+Questions are now answered from the image plus measured positions and distances of
+confirmed objects only. A stronger language model is the real fix here, which is what
+the Colab profiles are for.
+
+### Events on the two sample clips
+
+| Clip | Events, first version | Events, now |
+|------|-----------------------|-------------|
+| Dog in a square, 11 s | 49 | 16 |
+| Two people on a sofa, 16 s | 88 | 28 |
+
+The first version announced every detector label, including a hand cart labelled
+"truck". Now only labels confirmed by both models produce events, and a tracker id
+switch on a still-visible object is re-linked instead of reported as "left" then
+"appeared".
+
+### Speed
+
+4K 25 fps video resized to 960 px wide; timings use `torch.cuda.synchronize()`.
+
+| Stage | Median |
+|-------|--------|
+| Detect + segment (YOLOE-26s, 640, masks at frame resolution) | 40 ms |
+| Track | 3 ms |
+| Depth (every 3rd frame) | 49 ms |
 | Scene memory | 1 ms |
-| 4K video decode (not needed for a webcam) | 22 ms |
-| **End to end, perception only** | **92 ms median, 9.7 FPS** |
-| End to end with narration running | 130 ms median, 7.3 FPS |
-| Narration (40 tokens, concurrent with perception) | 4.4 s |
-| Narration alone, GPU otherwise idle | 1.6 to 2.2 s |
-| Peak GPU memory, all models loaded | 2.3 GB |
+| **End to end, perception only** | **70 ms, 12.3 FPS** |
+| End to end with the language loop running | about 150 to 175 ms, 5 to 6 FPS |
+| One description (two model calls plus verification), concurrent with perception | about 10 s |
+| One answer to a question | 0.7 to 1.9 s |
+| Changing the detector vocabulary | 1 ms (plus about 1 s per new word, off the camera thread) |
+| Peak GPU memory | 2.5 GB |
 
-What these numbers say, plainly:
-
-- The perception loop is interactive (about 10 FPS) but below 30 FPS on this card.
-- Narration lags the event that triggered it by several seconds. The structured event
-  line is available immediately; the sentence follows.
-- Timings are sensitive to other load. With unrelated CPU-heavy jobs running on the
-  same machine the same run dropped to about 5 FPS. The JSON files in `outputs/` were
-  written during such a loaded run; rerun the benchmark command below on an idle
-  machine to reproduce the table.
-- Half precision does not help on this GPU. `tools/precision_check.py` measured the
-  depth model at 29 ms in FP32 and 86 ms under FP16 autocast (outputs matched to
-  0.05 %), so everything runs in FP32. On an RTX-class or Colab T4 GPU, FP16 should
-  be a real speed-up; that has not been measured here.
+Plainly: perception is interactive, and a description arrives roughly ten seconds
+after the change that triggered it on this GPU. Half precision does not help on this
+card (`tools/precision_check.py`: 29 ms in FP32, 86 ms in FP16 for the depth model).
 
 ### Detection accuracy
 
@@ -79,33 +155,29 @@ version of this project, run on the same images.
 | Detector | Vocabulary | mAP 50-95 | mAP 50 | Small / medium / large |
 |----------|------------|-----------|--------|------------------------|
 | YOLOv8m (earlier project) | 80 fixed classes, trained on COCO | 0.526 | 0.694 | 0.342 / 0.590 / 0.655 |
-| YOLOE-26s (default here) | any text, zero-shot | 0.383 | 0.537 | 0.224 / 0.427 / 0.521 |
+| YOLOE-26s (`laptop` profile) | any text, zero-shot | 0.383 | 0.537 | 0.224 / 0.427 / 0.521 |
 | YOLOE-26m (`--weights yoloe-26m-seg.pt`) | any text, zero-shot | 0.438 | 0.605 | 0.287 / 0.477 / 0.567 |
 
-Read this honestly: on the 80 classes COCO was built around, the supervised detector
-is more accurate, by 14 points for the small open-vocabulary model and 9 for the
-medium one. What the open-vocabulary detector buys is everything outside those 80
-classes ("game controller", "whiteboard", "red backpack"), instance masks from the
-same pass, and no retraining to change the vocabulary. The medium model recovers
-5.5 mAP for roughly 15 to 25 % more detector time on this GPU (measured back to back
-under the same load: 96 to 107 ms vs 121 ms per frame), so it is the better choice
-when accuracy matters more than frame rate.
+On the 80 classes COCO was built around, the supervised detector is more accurate. The
+open-vocabulary detector is what makes verification of arbitrary objects possible at
+all, and its accuracy is the ceiling on how much real content strict verification keeps.
 
-Not measured yet: accuracy on the full 5,000-image set and on rare categories (LVIS),
-tracking accuracy, depth error, and narration quality. See "Roadmap".
+Not measured yet: the Colab profiles, the full 5,000-image set, rare categories (LVIS),
+tracking accuracy, depth error, and answer quality beyond yes/no questions.
 
 ## Known limitations
 
-- People in dark, close-up footage are sometimes missed or dropped by the tracker
-  (seen on a dim living-room test clip). YOLOE-26s is far better than YOLOE-11s here
-  (person confidence 0.56 vs 0.21 on the same frame) but not reliable.
-- Track IDs churn on cluttered background objects, which produces extra
-  appeared / left events.
-- The 500M-parameter language model sometimes states things that are not in the scene
-  (for example calling a game controller a phone, following the detector's mistake).
+- Strict verification also removes true statements when the detector misses a real
+  object. Example from the benchmark: a close-up of a bear, described correctly, was
+  cut because the detector found only "eye" and "nose".
+- When both models make the same mistake it passes. On the sofa clip the game
+  controllers are still sometimes called phones, because the detector's "phone" and the
+  small language model's "phone" agree.
+- Only objects are verified. Colours, actions and relations in a description are not.
+- With the 500M language model, answers are short and descriptions are simple.
+- People in dark, close-up footage are sometimes missed by the small detector.
 - Metric depth comes from an indoor-trained model; outdoor distances beyond about
   10 m are rough.
-- Mask outlines of multi-part objects can show stray connecting lines in the overlay.
 
 ## Run locally (Windows, NVIDIA GPU)
 
@@ -139,10 +211,19 @@ Check that the GPU is visible (should print `True` and the GPU name):
 .\.venv\Scripts\python.exe run.py --vocab "person,coffee mug,red backpack,whiteboard"
 .\.venv\Scripts\python.exe run.py --no-vlm                         # perception only, fastest
 .\.venv\Scripts\python.exe run.py --weights yoloe-26m-seg.pt       # more accurate detector
+.\.venv\Scripts\python.exe run.py --profile laptop                 # force a profile (default: auto)
 ```
 
-In the window: `q` quits, `d` forces a description now, and typing a question in the
-PowerShell console followed by Enter asks the language model about the current view.
+**Asking questions.** Click the video window, press `a`, type your question in the
+window and press Enter (Esc cancels). A video file pauses while you type. The answer
+appears in green above the description. Other keys: `space` pauses, `d` forces a fresh
+description, `q` quits.
+
+Without a window, ask from the command line:
+
+```powershell
+.\.venv\Scripts\python.exe run.py --source samples\dog_square.mp4 --headless --ask "What is the dog doing?" --ask-at 3
+```
 
 **Without a window** (save an annotated video and a latency report):
 
@@ -154,7 +235,11 @@ PowerShell console followed by Enter asks the language model about the current v
 
 ```powershell
 .\.venv\Scripts\python.exe tests\test_memory.py            # unit tests, no GPU needed
+.\.venv\Scripts\python.exe tests\test_describe.py
+.\.venv\Scripts\python.exe tests\test_chair.py
 .\.venv\Scripts\python.exe tools\eval_coco.py --n 1000     # detection mAP on a COCO subset
+.\.venv\Scripts\python.exe tools\eval_hallucination.py --vlm HuggingFaceTB/SmolVLM2-500M-Video-Instruct --task chair --mode verified --two-step
+.\.venv\Scripts\python.exe tools\eval_hallucination.py --vlm HuggingFaceTB/SmolVLM2-500M-Video-Instruct --task pope
 .\.venv\Scripts\python.exe tools\precision_check.py samples\dog_square.mp4   # FP32 vs FP16 on your GPU
 ```
 
@@ -166,14 +251,17 @@ webcam.
 
 ## Run on Google Colab
 
-Colab cannot use your webcam at interactive speed, so use it for video files, the
-full accuracy evaluation, and larger models. The notebook
-[notebooks/livescene_colab.ipynb](notebooks/livescene_colab.ipynb) contains every
-step below as runnable cells.
+Colab is where the full-quality profiles run: a 3B or 7B language model, the largest
+detector and depth model. It cannot use your webcam at interactive speed, so it works
+on video files. The notebook
+[notebooks/livescene_colab.ipynb](notebooks/livescene_colab.ipynb) contains every step
+below as runnable cells. It has not been run on Colab yet; if a cell fails, the error
+message is what is needed to fix it.
 
 1. Open [colab.research.google.com](https://colab.research.google.com), choose
    File, Upload notebook, and upload `notebooks/livescene_colab.ipynb`.
-2. Runtime, Change runtime type, select a GPU (T4 or better), Save.
+2. Runtime, Change runtime type, select a GPU, Save. A T4 selects the `colab-t4`
+   profile; an L4 or A100 selects `colab`.
 3. Get the code into Colab. If the repository is public:
 
    ```
@@ -181,21 +269,23 @@ step below as runnable cells.
    %cd livescene
    ```
 
-   If it is private: on GitHub choose Code, Download ZIP, then upload the ZIP with the
-   notebook's upload cell, which unpacks it.
+   If it is private: on GitHub choose Code, Download ZIP, set `USE_ZIP = True` in the
+   notebook's second cell, and upload the ZIP when asked.
 4. Install the libraries (PyTorch with CUDA is already on Colab):
 
    ```
    !pip -q install -r requirements.txt
    !pip -q install https://github.com/ultralytics/CLIP/archive/refs/heads/main.zip
    ```
-5. Upload a video and process it:
+5. Upload a video, process it, and ask it a question:
 
    ```
    from google.colab import files
    video = next(iter(files.upload()))
-   !python run.py --source "$video" --headless --save outputs/colab_demo.mp4 --report outputs/colab_bench.json
+   !python run.py --source "$video" --headless --save outputs/colab_demo.mp4 --report outputs/colab_bench.json --ask "What is happening in this video?" --ask-at 3
    ```
+
+   The first run downloads the models (about 8 GB for `colab-t4`, 18 GB for `colab`).
 6. Watch the result (re-encoded so the browser can play it):
 
    ```
@@ -203,53 +293,68 @@ step below as runnable cells.
    from IPython.display import Video
    Video("outputs/colab_demo_h264.mp4", embed=True, width=800)
    ```
-7. Run the full COCO evaluation (all 5,000 validation images):
+7. Measure hallucination for the model your GPU selected (this is the table to compare
+   with the laptop numbers above):
 
    ```
-   !python tools/eval_coco.py --n 5000 --out outputs/coco_yoloe26s_full.json
+   !python tools/eval_hallucination.py --vlm "$VLM" --task pope --images 200 --max-side $SIDE --out outputs/pope_colab_plain.json
+   !python tools/eval_hallucination.py --vlm "$VLM" --task chair --mode plain --images 200 --tokens 120 --max-side $SIDE --out outputs/chair_colab_plain.json
+   !python tools/eval_hallucination.py --vlm "$VLM" --task chair --mode verified --detector $DETECTOR --images 200 --tokens 120 --max-side $SIDE --out outputs/chair_colab_verified.json
    ```
-8. Download what you want to keep with `files.download("outputs/colab_bench.json")`.
-   Colab deletes the session's files when it disconnects.
+8. Run the full COCO detection evaluation (all 5,000 validation images):
+
+   ```
+   !python tools/eval_coco.py --n 5000 --weights $DETECTOR --out outputs/coco_colab_full.json
+   ```
+9. Download the JSON files and the video from `outputs/` with the last cell. Colab
+   deletes the session's files when it disconnects.
 
 ## Local or Colab?
 
-| | Local GPU | Colab |
-|-|-----------|-------|
-| Live webcam, questions typed live | Yes | No |
-| Video files | Yes | Yes |
-| Full 5,000-image COCO evaluation | Slow but possible | Recommended |
-| Larger models (YOLOE-L, bigger VLM) | Limited by 6 GB | Yes |
-| Half precision speed-up | No on GTX 16-series (measured) | Expected on T4 and newer |
+| | Local GPU (6 GB) | Colab |
+|-|------------------|-------|
+| Live webcam, questions typed in the window | Yes | No |
+| Video files, questions with `--ask` | Yes | Yes |
+| Language model | 500M parameters | 3B or 7B parameters |
+| Detector and depth model | Small | Large |
+| Several frames per description (motion) | No | Yes |
+| Full benchmarks | Slow but possible | Recommended |
+
 ## Roadmap
 
-1. Full-set accuracy on Colab: `python tools/eval_coco.py --n 5000`, plus LVIS
-   minival, where open-vocabulary detection is expected to show its advantage.
-2. Narration quality: grounded vs ungrounded prompts, scored for object hallucination.
-3. TensorRT export of the detector and depth model.
-4. Event precision: appearance-based re-identification to stop ID churn.
+1. Run the Colab profiles and add their hallucination and accuracy numbers.
+2. Verify attributes and actions, not only objects.
+3. Stop double errors: require the verifying detector to beat competing labels, not
+   only to find the object.
+4. TensorRT export of the detector and depth model for the laptop profile.
 5. Pose keypoints for action events.
 
 ## Repository layout
 
 ```
-run.py                   entry point (webcam, file, benchmark)
-livescene/memory.py      scene memory, events, grounding prompt
-livescene/perception.py  YOLOE + ByteTrack wrapper, metric depth, per-object distance
-livescene/narrator.py    asynchronous vision-language model
-livescene/pipeline.py    per-frame orchestration and overlay drawing
-livescene/profiler.py    latency statistics
-livescene/paths.py       where downloaded models and data are stored
-tests/test_memory.py     synthetic-track tests for the memory
-tools/precision_check.py FP32 vs FP16 check for the current GPU
-tools/eval_coco.py       COCO box mAP for open-vocabulary and closed-set detectors
-notebooks/               Colab notebook
-docs/                    concepts, code guide, install log
-outputs/                 benchmark reports (annotated videos are git-ignored)
+run.py                       entry point: window, keys, questions, reports
+livescene/config.py          model profiles (laptop, colab-t4, colab)
+livescene/describe.py        propose, verify, describe; prompts and text checks
+livescene/vlm.py             language model backends
+livescene/perception.py      detector with a changeable vocabulary, tracker, depth
+livescene/memory.py          scene memory: trust, events, re-linking
+livescene/narrator.py        language thread
+livescene/pipeline.py        the two loops and the overlay
+livescene/profiler.py        latency statistics
+livescene/paths.py           where downloaded models and data are stored
+tests/                       27 unit tests, no GPU needed
+tools/eval_hallucination.py  POPE and CHAIR benchmarks
+tools/chair.py               CHAIR scorer
+tools/eval_coco.py           COCO detection mAP
+tools/precision_check.py     FP32 vs FP16 check for the current GPU
+notebooks/                   Colab notebook
+docs/                        concepts, code guide, install log
+outputs/                     benchmark reports (annotated videos are git-ignored)
 ```
-
 ## Credits
 
 Built on [Ultralytics YOLOE](https://docs.ultralytics.com/models/yoloe/),
 [Depth Anything V2](https://github.com/DepthAnything/Depth-Anything-V2),
-[SmolVLM2](https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct) and
-ByteTrack. Check each model's licence before commercial use (Ultralytics is AGPL-3.0).
+[SmolVLM2](https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct),
+[Qwen2.5-VL](https://huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct) and ByteTrack. The benchmarks follow POPE
+(Li et al., 2023) and CHAIR (Rohrbach et al., 2018). Check each model's licence before commercial use (Ultralytics is AGPL-3.0).

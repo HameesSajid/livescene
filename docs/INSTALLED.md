@@ -1,6 +1,6 @@
 # What was installed, where, and how to remove it
 
-Last updated: 2026-10-07. Sizes are as measured on that date.
+Last updated: 2026-10-08. Sizes are as measured on that date.
 
 Nothing was added to your existing system Python (3.10, CPU-only PyTorch). It is
 unchanged. LiveScene uses its own environment, which is the one that uses the GPU.
@@ -27,7 +27,9 @@ total. It is not inside OneDrive, so none of it syncs.
 | `.cache\weights\yolov8m.pt` | 50 MB | The earlier project's detector, used only as the baseline in `tools\eval_coco.py` | No |
 | `.cache\weights\yoloe-11s-seg.pt`, `yoloe-11m-seg.pt` | 84 MB | Detectors tried during model selection; not used, safe to delete | No |
 | `.cache\weights\mobileclip_blt.ts` | 572 MB | Text encoder for the YOLOE-11 models; not used, safe to delete | No |
-| `.cache\data\coco\` | 174 MB | COCO val2017 annotations and the first 1,000 images, for `tools\eval_coco.py` | No |
+| `.cache\data\coco\` | 178 MB | COCO val2017 annotations (instances and captions) and the first 1,000 images, for the benchmarks | No |
+| `.cache\data\chair\synonyms.txt` | 5 KB | The official CHAIR synonym list | No |
+| `.cache\eval\` | under 1 MB | Per-image benchmark logs (every caption and answer) | No |
 | `.git\` (hidden) | under 1 MB | Git history | It is the link to GitHub |
 
 The "No" rows are excluded by `.gitignore`. Anything in `.cache` re-downloads
@@ -114,4 +116,5 @@ The GitHub CLI is not installed.
 | 2026-10-07 | Downloaded YOLOE-11s/11m/26m and MobileCLIP-BLT for comparison |
 | 2026-10-07 | Git for Windows 2.56.0 installed by the user; repository initialised and pushed to GitHub |
 | 2026-10-07 | Downloaded COCO val2017 annotations and 1,000 images; downloaded `yolov8m.pt` as the evaluation baseline |
+| 2026-10-08 | Downloaded COCO reference captions and the CHAIR synonym list for the hallucination benchmarks. No new Python packages. The Colab profiles' models (Qwen2.5-VL, larger YOLOE and depth models) are not on this PC; they download on Colab |
 | 2026-10-07 | Moved the whole project to `C:\Users\hamee\vscode\livescene\`; environment rebuilt there as `.venv`, downloads moved to `.cache`, sample clips copied to `samples\` |
