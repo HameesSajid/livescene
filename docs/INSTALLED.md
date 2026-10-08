@@ -16,9 +16,9 @@ total. It is not inside OneDrive, so none of it syncs.
 | `run.py`, `livescene\`, `tests\`, `tools\`, `notebooks\` | under 1 MB | Source code and the Colab notebook | Yes |
 | `README.md`, `docs\` | under 1 MB | Documentation | Yes |
 | `outputs\*.json` | under 1 MB | Benchmark and accuracy reports | Yes |
-| `outputs\*.mp4` | 10 MB | Two annotated demo videos | No |
+| `outputs\*.mp4` | 12 MB | Two annotated demo videos | No |
 | `samples\` | 104 MB | Copies of your two test clips (`dog_square.mp4`, `gaming_sofa.mp4`). The originals are still in your OneDrive project folder | No |
-| `.venv\` | 5.1 GB | Python virtual environment: PyTorch 2.6.0 + CUDA 12.4, torchvision 0.21.0, ultralytics 8.4.174, transformers 5.19.0, accelerate, lap, pycocotools, opencv-python, numpy, pillow, num2words, clip (Ultralytics fork) and their dependencies | No |
+| `.venv\` | 5.1 GB | Python virtual environment, 66 packages. Installed directly: torch 2.6.0+cu124, torchvision 0.21.0+cu124, ultralytics 8.4.174, transformers 5.19.0, accelerate 1.15.0, num2words 0.5.14, lap 0.5.13, pycocotools 2.0.11, opencv-python 5.0.0.93, numpy 2.2.6, pillow 12.3.0, clip 1.0 (Ultralytics fork). The rest are their dependencies | No |
 | `.cache\hf\hub\models--HuggingFaceTB--SmolVLM2-500M-Video-Instruct\` | 1.9 GB | Vision-language model | No |
 | `.cache\hf\hub\models--depth-anything--Depth-Anything-V2-Metric-Indoor-Small-hf\` | 95 MB | Depth model | No |
 | `.cache\weights\yoloe-26s-seg.pt` | 30 MB | Detector in use | No |
@@ -69,7 +69,7 @@ Remove-Item -Recurse -Force C:\Users\hamee\vscode\livescene\.venv
 | Path | Size | What | Remove with |
 |------|------|------|-------------|
 | `%APPDATA%\Ultralytics\` | a few KB | Ultralytics settings file, created on first import | `Remove-Item -Recurse "$env:APPDATA\Ultralytics"` |
-| `%LOCALAPPDATA%\pip\cache\` | 3.7 GB total | pip's download cache. Shared with your other Python work; the LiveScene install added roughly 3 GB of wheels to it | `python -m pip cache purge` (safe; only makes future installs re-download) |
+| `%LOCALAPPDATA%\pip\cache\` | 3.8 GB total | pip's download cache. Shared with your other Python work; the LiveScene installs added roughly 3 GB of downloaded packages to it, including the bitsandbytes download described in section 6 | `python -m pip cache purge` (safe; only makes future installs re-download) |
 | Windows Credential Manager, entry `git:https://github.com` | none | Your saved GitHub sign-in for pushing | Control Panel, Credential Manager, Windows Credentials |
 
 ## 3. Using the GPU instead of the CPU
@@ -107,6 +107,27 @@ The GitHub CLI is not installed.
 | `...\OneDrive - UAB...\Computer vision\project\livescene\` | Moved to `C:\Users\hamee\vscode\livescene\` on 2026-10-07. Your original project files in that OneDrive folder were not touched |
 | `C:\Users\hamee\cv-envs\livescene\` | Models and data moved into `.cache`; the environment was rebuilt as `.venv` and the old copy deleted |
 
+## 6. Deliberately not installed on this PC
+
+At your request (2026-10-08), nothing further is installed or downloaded here for the
+larger models. In particular:
+
+| Item | Size it would take | Where it is used instead |
+|------|--------------------|--------------------------|
+| `bitsandbytes` (4-bit model loading) | 0.1 GB | Not needed; the Colab profiles use half precision |
+| Qwen2.5-VL-3B / 7B language models | 7.5 GB / 17 GB | Colab only (`colab-t4` and `colab` profiles) |
+| YOLOE-26l / 26x detectors | 76 MB / 164 MB | Colab only |
+| Depth Anything V2 Base / Large | 0.4 GB / 1.3 GB | Colab only |
+
+One correction for the record: `bitsandbytes` 0.50.2 was installed into `.venv` on
+2026-10-08, because the install had already finished when the command it was part of
+was stopped. It was uninstalled the same day (`pip uninstall bitsandbytes`). It
+brought no other packages with it, and no Qwen files were downloaded. Its downloaded
+package file may remain in pip's cache (section 2).
+
+Running `--profile colab` or `--profile colab-t4` on this PC would start downloading
+those models into `.cache`. The default `auto` never selects them on a 6 GB GPU.
+
 ## Change log
 
 | Date | Change |
@@ -116,5 +137,7 @@ The GitHub CLI is not installed.
 | 2026-10-07 | Downloaded YOLOE-11s/11m/26m and MobileCLIP-BLT for comparison |
 | 2026-10-07 | Git for Windows 2.56.0 installed by the user; repository initialised and pushed to GitHub |
 | 2026-10-07 | Downloaded COCO val2017 annotations and 1,000 images; downloaded `yolov8m.pt` as the evaluation baseline |
-| 2026-10-08 | Downloaded COCO reference captions and the CHAIR synonym list for the hallucination benchmarks. No new Python packages. The Colab profiles' models (Qwen2.5-VL, larger YOLOE and depth models) are not on this PC; they download on Colab |
 | 2026-10-07 | Moved the whole project to `C:\Users\hamee\vscode\livescene\`; environment rebuilt there as `.venv`, downloads moved to `.cache`, sample clips copied to `samples\` |
+| 2026-10-08 | Downloaded COCO reference captions (into `.cache\data\coco`) and the CHAIR synonym list (into `.cache\data\chair`) for the hallucination benchmarks |
+| 2026-10-08 | `bitsandbytes` 0.50.2 installed into `.venv`, then uninstalled the same day at the user's request. Environment is back to 66 packages |
+| 2026-10-08 | Decision recorded: no further installs or model downloads on this PC; larger models run on Colab only |
