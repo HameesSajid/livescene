@@ -24,19 +24,23 @@ To get it back: [README, "Getting it back on a PC from GitHub"](../README.md#get
 
 ### Still installed on this PC (checked 2026-11-03)
 
-None of these were removed. Only the first group was installed for this project.
+Only the first two rows came from this project.
 
 | Item | Where | Size | Notes |
 |------|-------|------|-------|
-| pip download cache | `%LOCALAPPDATA%\pip\cache\` | 3.7 GB | About 3 GB of it is LiveScene's package downloads. Keeping it makes rebuilding `.venv` faster and mostly offline. Remove with `python -m pip cache purge` |
 | Ultralytics settings | `%APPDATA%\Ultralytics\` | a few KB | Remove with `Remove-Item -Recurse "$env:APPDATA\Ultralytics"` |
 | Saved GitHub sign-in | Windows Credential Manager, `git:https://github.com` | none | Needed to clone the private repositories again |
 | Git for Windows 2.56.0 | `C:\Program Files\Git\` | 362 MB | Installed by you; needed to clone again |
 | Python 3.10.0 and the Python Launcher 3.13 | `%LOCALAPPDATA%\Programs\Python\Python310\`, `C:\Windows\py.exe` | 3.4 GB of packages | Your own system Python (it has CPU-only torch 2.6.0, OpenCV, numpy). Not used by LiveScene except to create `.venv` |
-| PyTorch hub cache | `%USERPROFILE%\.cache\torch\hub\checkpoints\vgg16-397923af.pth` | 528 MB | From February 2025, not from this project. Safe to delete if unused |
 | Visual Studio Code 1.141 | `%LOCALAPPDATA%\Programs\Microsoft VS Code\` | | Your editor |
 | NVIDIA Graphics Driver 610.74, NVIDIA App, PhysX, HD Audio and related NVIDIA components | `C:\Program Files\NVIDIA Corporation\` | | The GPU driver; needed for CUDA. There is no separate CUDA Toolkit or cuDNN: PyTorch ships its own CUDA libraries inside `.venv` |
 | Microsoft Visual C++ Redistributables 2010 to 2022 | Windows | | Shared runtime libraries used by many programs; leave them |
+
+Also removed on 2026-11-03, at your request: pip's download cache
+(`%LOCALAPPDATA%\pip\cache\`, 3.7 GB, about 3 GB of it LiveScene's packages; rebuilding
+`.venv` now downloads them again) and `%USERPROFILE%\.cache\`, which held only a 528 MB
+PyTorch hub file `vgg16-397923af.pth` from February 2025, not from this project. The
+CPU-only torch package in your system Python was not touched.
 
 There is no Hugging Face cache outside the project (`%USERPROFILE%\.cache\huggingface`
 does not exist), no `C:\Users\hamee\cv-envs\`, no conda, no ffmpeg and no GitHub CLI.
@@ -181,3 +185,4 @@ those models into `.cache`. The default `auto` never selects them on a 6 GB GPU.
 | 2026-10-08 | `bitsandbytes` 0.50.2 installed into `.venv`, then uninstalled the same day at the user's request. Environment is back to 66 packages |
 | 2026-10-08 | Decision recorded: no further installs or model downloads on this PC; larger models run on Colab only |
 | 2026-11-03 | Two demo videos moved to `C:\Users\hamee\Videos\LiveScene demos\`; whole project folder deleted from the PC (8.6 GB) after confirming GitHub had every commit. Restore steps added to the README |
+| 2026-11-03 | pip download cache (3.7 GB) and `%USERPROFILE%\.cache\torch` (528 MB) deleted at the user's request |
