@@ -179,6 +179,53 @@ tracking accuracy, depth error, and answer quality beyond yes/no questions.
 - Metric depth comes from an indoor-trained model; outdoor distances beyond about
   10 m are rough.
 
+## Getting it back on a PC from GitHub
+
+The repository holds the code, documents, notebook and JSON reports. It does not hold
+the Python environment, the model weights, the COCO data, the sample clips or the demo
+videos; those are rebuilt or re-downloaded as below. (The local copy at
+`C:\Users\hamee\vscode\livescene` was removed on 2026-11-03 to free disk space; see
+[docs/INSTALLED.md](docs/INSTALLED.md).)
+
+1. **Clone.** The repository is private, so Git needs your GitHub sign-in (Git for
+   Windows asks for it in a browser window the first time and saves it):
+
+   ```powershell
+   cd C:\Users\hamee\vscode
+   git clone https://github.com/HameesSajid/livescene.git
+   cd livescene
+   ```
+
+   If `git` is not found, use its full path, `& "C:\Program Files\Git\cmd\git.exe"`.
+2. **Recreate the environment** (about 5 GB, 10 to 20 minutes): the four commands
+   under "One-time setup" below.
+3. **Models download by themselves** into `.cache` on the first run (about 2.4 GB for
+   the `laptop` profile: SmolVLM2-500M, Depth Anything V2 Small, YOLOE-26s and its
+   MobileCLIP2 text encoder). To fetch them up front, run once on any video:
+
+   ```powershell
+   .\.venv\Scripts\python.exe run.py --source <any video>.mp4 --headless
+   .\.venv\Scripts\python.exe run.py --source <any video>.mp4 --headless --weights yoloe-26m-seg.pt
+   ```
+
+   The second line also fetches the medium detector, which HomeRecall uses. The COCO
+   images and annotations (about 180 MB) and the CHAIR synonym list download the first
+   time `tools\eval_coco.py` or `tools\eval_hallucination.py` runs.
+4. **Sample clips.** Copy the two test clips from the original course folder into
+   `samples\` under the names the commands below use:
+   `2796077-uhd_3840_2160_25fps.mp4` becomes `samples\dog_square.mp4` and
+   `4010184-uhd_4096_2160_25fps.mp4` becomes `samples\gaming_sofa.mp4`.
+5. **Demo videos.** The two annotated demos were kept outside the repository in
+   `C:\Users\hamee\Videos\LiveScene demos\`. To remake them:
+
+   ```powershell
+   .\.venv\Scripts\python.exe run.py --source samples\dog_square.mp4 --headless --save outputs\demo_dog.mp4
+   .\.venv\Scripts\python.exe run.py --source samples\gaming_sofa.mp4 --headless --save outputs\demo_clip2.mp4
+   ```
+
+To run on Colab instead, nothing on the PC is needed: see
+[Run on Google Colab](#run-on-google-colab).
+
 ## Run locally (Windows, NVIDIA GPU)
 
 Yes, it runs fully on your own machine: no cloud service or API key is used. You need
